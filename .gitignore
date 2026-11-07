@@ -1,0 +1,130 @@
+# ==========================================
+# BASE DE DATOS Y DOCKER
+# ==========================================
+# Ignorar los binarios crudos de PostgreSQL
+pgdata/
+
+# ==========================================
+# PYTHON / DJANGO (Backend)
+# ==========================================
+# Archivos estáticos recolectados
+backend/staticfiles/
+backend/static_root/
+
+# Entornos virtuales
+backend/venv/
+backend/env/
+backend/ENV/
+backend/.venv/
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribución / empaquetado
+backend/build/
+backend/develop-eggs/
+backend/dist/
+backend/downloads/
+backend/eggs/
+.eggs/
+backend/lib/
+backend/lib64/
+backend/parts/
+backend/sdist/
+backend/var/
+backend/wheels/
+backend/share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Bases de datos locales de desarrollo (por si usan SQLite en lugar de PostgreSQL)
+backend/db.sqlite3
+backend/db.sqlite3-journal
+
+# Archivos de configuración local y logs de Django
+backend/*.log
+backend/local_settings.py
+backend/media/
+
+# ==========================================
+# NODE.JS / REACT / VITE (Frontend)
+# ==========================================
+
+# Dependencias
+frontend/node_modules/
+frontend/jspm_packages/
+
+# Archivos de compilación de producción (Vite / Webpack)
+frontend/dist/
+frontend/build/
+frontend/out/
+
+# Caché de Vite y Node
+frontend/.vite/
+frontend/.npm
+frontend/.eslintcache
+frontend/.cache
+
+# Logs de npm / yarn / pnpm
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+# ==========================================
+# VARIABLES DE ENTORNO Y CREDENCIALES
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+
+# ==========================================
+# IDEs Y EDITORES (VS Code, PyCharm)
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# ==========================================
+# SISTEMA OPERATIVO
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==========================================
+# ARCHIVOS TEMPORALES O DE PRUEBAS LOCALES
+# ==========================================
+*.xlsx
+*.csv
+*.zip
+*.rar
+
+# Ignorar PDFs generados por el sistema (Facturas SAR),
+# PERO permitir los PDFs de documentación requeridos por la clase.
+*.pdf
+!Manual_Usuario*.pdf
+!Manual_Tecnico*.pdf
+!Trifolio*.pdf
+!database/Diccionario_Datos*.pdf

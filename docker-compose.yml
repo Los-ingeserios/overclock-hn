@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: overclock_db_dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: OverClock_HN_IIIPAC_2026.
+      POSTGRES_DB: overclock_hn
+      TZ: America/Tegucigalpa # Hora local para la factura SAR
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+      - ./database/oveclock_hn.sql:/docker-entrypoint-initdb.d/1-schema.sql
+
+volumes:
+  pgdata:
