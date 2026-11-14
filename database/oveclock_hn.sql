@@ -3,7 +3,7 @@
 DO $$ DECLARE
     record RECORD;
 BEGIN
-    FOR record IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+    FOR record IN (SELECT tablename FROM pg_tables WHERE schemaname = "current_schema"()) LOOP
         EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(record.tablename) || ' CASCADE';
     END LOOP;
 END $$;
@@ -15,8 +15,10 @@ CREATE TABLE usuarios(
     contrasena varchar(100) NOT NULL,
     fecha_creacion timestamp DEFAULT(current_timestamp) NOT NULL,
     url_foto varchar(50) NULL,
-    administrador integer DEFAULT(0) NOT NULL
+    administrador integer DEFAULT(0) NOT NULL -- Valor para determinar los permisos del usuario. 1 para administrador, 0 en caso contrario
 );
+
+-- CREATE TABLE personas();
 
 CREATE TABLE clientes(
     id_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -38,8 +40,9 @@ CREATE TABLE clientes(
 
 CREATE TABLE usuarios_clientes(
     id_usuario_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_usuario integer UNIQUE REFERENCES usuarios(id_usuario),
-    id_cliente integer REFERENCES clientes(id_cliente)
+    id_usuario integer UNIQUE REFERENCES usuarios(id_usuario), -- El usuario solo puede estar presente una vez en la tabla, para un cliente
+    id_cliente integer REFERENCES clientes(id_cliente),
+    ultimo_acceso timestamp
 );
 
 CREATE TABLE paises(
@@ -70,9 +73,9 @@ CREATE TABLE direcciones(
 
 CREATE TABLE direcciones_clientes(
     id_direccion_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_direccion integer UNIQUE REFERENCES direcciones(id_direccion),
+    id_direccion integer UNIQUE REFERENCES direcciones(id_direccion), -- La direccion solo puede pertenecer a un cliente con la restriccion UNIQUE
     id_cliente integer REFERENCES clientes(id_cliente),
-    predeterminada integer DEFAULT(0) NOT NULL
+    predeterminada integer DEFAULT(0) NOT NULL -- Valor si el usuario marco una direccion como predeterminada
 );
 
 CREATE TABLE categorias(
@@ -89,7 +92,7 @@ CREATE TABLE marcas(
 
 CREATE TABLE especificaciones(
     id_espeficicacion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    socket varchar(50) NOT NULL,
+    socket varchar(50), -- De forma general socket, puerto, ranura
     dimensiones varchar(50) NOT NULL
         CHECK (dimensiones ~~ '[0-9]x[0-9]x[0-9]'),
     peso varchar(20) NOT NULL,
@@ -115,16 +118,19 @@ CREATE TABLE productos(
 CREATE TABLE numeros_serie(
     id_numero_serie integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_producto integer REFERENCES productos(id_producto),
-    numero_serie varchar(20) UNIQUE NOT NULL,
+    numero_serie varchar(20) UNIQUE NOT NULL, -- Numero de serie unico para cada existencia de un producto
     fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
-    disponible integer DEFAULT(1) NOT NULL
+    disponible integer DEFAULT(1) NOT NULL -- Se marca como 0 cuando el producto se ha vendido, indicando que el numero de serie fue utilizado
 );
 
-CREATE TABLE proveedores(
-    id_proveedor integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_direccion integer REFERENCES direcciones(id_direccion),
-    nombre varchar(100) NOT NULL,
-    estado integer NOT NULL
+
+CREATE TABLE garantias(
+    id_garantia integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_cliente integer REFERENCES clientes(id_cliente),
+    id_numero_serie integer REFERENCES numeros_serie(id_numero_serie),
+    fecha_inicio date DEFAULT(current_date) NOT NULL,
+    fecha_vencimiento date NOT NULL,
+    estado varchar(20) DEFAULT('Activa') NOT NULL
 );
 
 CREATE TABLE carritos(
@@ -145,13 +151,16 @@ CREATE TABLE detalles_carritos(
     subtotal decimal(19, 4) NOT NULL
 );
 
-CREATE TABLE garantias(
-    id_garantia integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_cliente integer REFERENCES clientes(id_cliente),
-    id_numero_serie integer REFERENCES numeros_serie(id_numero_serie),
-    fecha_inicio date DEFAULT(current_date) NOT NULL,
-    fecha_vencimiento date NOT NULL,
-    estado varchar(20) DEFAULT('Activa') NOT NULL
+CREATE TABLE proveedores(
+    id_proveedor integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_direccion integer REFERENCES direcciones(id_direccion),
+    rtn varchar(14) UNIQUE NOT NULL
+        CHECK(length(rtn) = 14),
+    nombre varchar(100) NOT NULL,
+    telefono varchar(20) UNIQUE NOT NULL,
+    correo varchar(50) UNIQUE NOT NULL
+        CHECK(correo ~~ '%@%'),
+    estado integer NOT NULL
 );
 
 CREATE TABLE compras(
@@ -186,37 +195,8 @@ CREATE TABLE sucursales(
     id_direccion integer REFERENCES direcciones(id_direccion),
     hora_apertura time NOT NULL,
     hora_cierre time NOT NULL,
+    telefono varchar(20) UNIQUE NOT NULL,
     estado integer NOT NULL
-);
-
-CREATE TABLE comprobantes_fiscales(
-    id_comprobante_fiscal integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    correlativo_minimo varchar(16) UNIQUE NOT NULL
-        CHECK(length(correlativo_minimo) = 16),
-    correlativo_maximo varchar(16) UNIQUE NOT NULL
-        CHECK(length(correlativo_maximo) = 16),
-    fecha_limite date NOT NULL
-);
-
-CREATE TABLE facturas(
-    id_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_comprobante_fiscal integer REFERENCES comprobantes_fiscales(id_comprobante_fiscal),
-    id_sucursal integer REFERENCES sucursales(id_sucursal),
-    id_vendedor integer REFERENCES vendedores(id_vendedor),
-    id_cliente integer REFERENCES clientes(id_cliente),
-    numero_factura varchar(50) UNIQUE NOT NULL,
-    fecha_venta timestamp DEFAULT(current_timestamp) NOT NULL,
-    subtotal decimal(19, 4) NOT NULL,
-    isv decimal(3, 2) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL,
-    total decimal(19, 4) NOT NULL
-);
-
-CREATE TABLE detalles_factura(
-    id_detalle_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_factura integer REFERENCES facturas(id_factura),
-    id_numero_serie integer UNIQUE REFERENCES numeros_serie(id_numero_serie),
-    precio_venta decimal(19, 4) NOT NULL
 );
 
 CREATE TABLE repartidores(
@@ -244,6 +224,43 @@ CREATE TABLE vendedores(
         CHECK ((extract(YEAR from current_date) - extract(YEAR from fecha_nacimiento)) >= 18),
     telefono varchar(20) UNIQUE NOT NULL
 );
+
+CREATE TABLE comprobantes_fiscales(
+    id_comprobante_fiscal integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    correlativo_minimo varchar(16) UNIQUE NOT NULL -- Inicio del rango de numeros factura disponibles para la empresa
+        CHECK(length(correlativo_minimo) = 16),
+    correlativo_maximo varchar(16) UNIQUE NOT NULL -- Fin del rango de numeros de factura
+        CHECK(length(correlativo_maximo) = 16),
+    fecha_limite date NOT NULL
+);
+
+CREATE TABLE facturas(
+    id_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_comprobante_fiscal integer REFERENCES comprobantes_fiscales(id_comprobante_fiscal),
+    id_sucursal integer REFERENCES sucursales(id_sucursal),
+    id_vendedor integer REFERENCES vendedores(id_vendedor),
+    id_cliente integer REFERENCES clientes(id_cliente),
+    numero_factura varchar(50) UNIQUE NOT NULL,
+    fecha_venta timestamp DEFAULT(current_timestamp) NOT NULL,
+    importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
+    importe_exento decimal(19, 4) NOT NULL, -- Monto donde no se aplica impuestos debido al tipo de servicio
+    importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
+    descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
+    subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
+    isv decimal(3, 2) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
+    total decimal(19, 4) NOT NULL -- Total final a pagar
+);
+
+CREATE TABLE detalles_factura(
+    id_detalle_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_factura integer REFERENCES facturas(id_factura),
+    id_numero_serie integer UNIQUE REFERENCES numeros_serie(id_numero_serie),
+    precio_venta decimal(19, 4) NOT NULL,
+    descuento decimal(3,2) NOT NULL, -- Porcentaje del descuento
+    monto_descuento decimal(19, 4) NOT NULL -- Monto que resulta de dicho descuento
+);
+
 
 CREATE TABLE pedidos(
     id_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
