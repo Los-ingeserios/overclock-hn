@@ -248,6 +248,7 @@ CREATE TABLE vendedores(
 CREATE TABLE pedidos(
     id_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_factura integer REFERENCES facturas(id_factura),
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago),
     fecha_creacion timestamp DEFAULT(current_timestamp) NOT NULL,
     fecha_finalizacion timestamp,
     estado varchar(20) DEFAULT('Pendiente') NOT NULL,
