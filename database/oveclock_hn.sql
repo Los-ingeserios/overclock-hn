@@ -1,5 +1,8 @@
 -- Script para el Avance 1
--- Bloque para eliminar todas las tablas del schema public, si ya existen previamente
+-- Cambia la conexion a la base de datos overlock_hn
+\c overclock_hn
+
+-- Bloque para eliminar todas las tablas del schema actual, si ya existen previamente
 DO $$ DECLARE
     record RECORD;
 BEGIN
@@ -73,9 +76,11 @@ CREATE TABLE direcciones(
 
 CREATE TABLE direcciones_clientes(
     id_direccion_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_direccion integer UNIQUE REFERENCES direcciones(id_direccion), -- La direccion solo puede pertenecer a un cliente con la restriccion UNIQUE
+    -- La direccion solo puede pertenecer a un cliente con la restriccion UNIQUE
+    id_direccion integer UNIQUE REFERENCES direcciones(id_direccion),
     id_cliente integer REFERENCES clientes(id_cliente),
-    predeterminada integer DEFAULT(0) NOT NULL -- Valor si el usuario marco una direccion como predeterminada
+    -- Valor si el usuario marco una direccion como predeterminada
+    predeterminada integer DEFAULT(0) NOT NULL
 );
 
 CREATE TABLE categorias(
@@ -90,21 +95,10 @@ CREATE TABLE marcas(
     nombre varchar(100) NOT NULL
 );
 
-CREATE TABLE especificaciones(
-    id_espeficicacion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    socket varchar(50), -- De forma general socket, puerto, ranura
-    dimensiones varchar(50) NOT NULL
-        CHECK (dimensiones ~~ '[0-9]x[0-9]x[0-9]'),
-    peso varchar(20) NOT NULL,
-    fecha_lanzamiento date NOT NULL,
-    detalles varchar(500) NOT NULL
-);
-
 CREATE TABLE productos(
     id_producto integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_categoria integer REFERENCES categorias(id_categoria),
     id_marca integer REFERENCES marcas(id_marca),
-    id_especificaciones integer REFERENCES especificaciones(id_espeficicacion),
     codigo_sku varchar(8) UNIQUE NOT NULL,
     modelo varchar(100) NOT NULL,
     precio_costo decimal(19, 4) NOT NULL,
@@ -115,40 +109,20 @@ CREATE TABLE productos(
     estado integer NOT NULL
 );
 
+CREATE TABLE especificaciones(
+    id_especificacion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_producto integer REFERENCES productos(id_producto),
+    especificacion varchar(100) NOT NULL
+);
+
 CREATE TABLE numeros_serie(
     id_numero_serie integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_producto integer REFERENCES productos(id_producto),
-    numero_serie varchar(20) UNIQUE NOT NULL, -- Numero de serie unico para cada existencia de un producto
+    -- Numero de serie unico para cada existencia de un producto
+    numero_serie varchar(20) UNIQUE NOT NULL,
     fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
-    disponible integer DEFAULT(1) NOT NULL -- Se marca como 0 cuando el producto se ha vendido, indicando que el numero de serie fue utilizado
-);
-
-
-CREATE TABLE garantias(
-    id_garantia integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_cliente integer REFERENCES clientes(id_cliente),
-    id_numero_serie integer REFERENCES numeros_serie(id_numero_serie),
-    fecha_inicio date DEFAULT(current_date) NOT NULL,
-    fecha_vencimiento date NOT NULL,
-    estado varchar(20) DEFAULT('Activa') NOT NULL
-);
-
-CREATE TABLE carritos(
-    id_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_usuario integer REFERENCES usuarios(id_usuario),
-    subtotal decimal(19, 4) NOT NULL,
-    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL,
-    total decimal(19, 4) NOT NULL
-);
-
-CREATE TABLE detalles_carritos(
-    id_detalle_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_carrito integer REFERENCES carritos(id_carrito),
-    id_producto integer REFERENCES productos(id_producto),
-    cantidad integer NOT NULL,
-    precio_venta decimal(19, 4) NOT NULL,
-    subtotal decimal(19, 4) NOT NULL
+    -- Se marca como 0 cuando el producto se ha vendido, indicando que el numero de serie fue utilizado
+    disponible integer DEFAULT(1) NOT NULL
 );
 
 CREATE TABLE proveedores(
@@ -182,6 +156,25 @@ CREATE TABLE detalles_compras(
     precio_compra decimal(19, 4) NOT NULL,
     subtotal decimal(19, 4) NOT NULL
 );
+
+CREATE TABLE carritos(
+    id_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_usuario integer REFERENCES usuarios(id_usuario),
+    subtotal decimal(19, 4) NOT NULL,
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL,
+    total decimal(19, 4) NOT NULL
+);
+
+CREATE TABLE detalles_carritos(
+    id_detalle_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_carrito integer REFERENCES carritos(id_carrito),
+    id_producto integer REFERENCES productos(id_producto),
+    cantidad integer NOT NULL,
+    precio_venta decimal(19, 4) NOT NULL,
+    subtotal decimal(19, 4) NOT NULL
+);
+
 
 CREATE TABLE metodos_pago(
     id_metodo_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -227,10 +220,10 @@ CREATE TABLE vendedores(
 
 CREATE TABLE comprobantes_fiscales(
     id_comprobante_fiscal integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    correlativo_minimo varchar(16) UNIQUE NOT NULL -- Inicio del rango de numeros factura disponibles para la empresa
-        CHECK(length(correlativo_minimo) = 16),
-    correlativo_maximo varchar(16) UNIQUE NOT NULL -- Fin del rango de numeros de factura
-        CHECK(length(correlativo_maximo) = 16),
+    correlativo_minimo varchar(19) UNIQUE NOT NULL -- Inicio del rango de numeros factura disponibles para la empresa
+        CHECK(length(correlativo_minimo) = 19),
+    correlativo_maximo varchar(19) UNIQUE NOT NULL -- Fin del rango de numeros de factura
+        CHECK(length(correlativo_maximo) = 19),
     fecha_limite date NOT NULL
 );
 
@@ -247,7 +240,7 @@ CREATE TABLE facturas(
     importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
     descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
     subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
-    isv decimal(3, 2) NOT NULL,
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
     monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
     total decimal(19, 4) NOT NULL -- Total final a pagar
 );
@@ -261,6 +254,14 @@ CREATE TABLE detalles_factura(
     monto_descuento decimal(19, 4) NOT NULL -- Monto que resulta de dicho descuento
 );
 
+CREATE TABLE garantias(
+    id_garantia integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_cliente integer REFERENCES clientes(id_cliente),
+    id_numero_serie integer REFERENCES numeros_serie(id_numero_serie),
+    fecha_inicio date DEFAULT(current_date) NOT NULL,
+    fecha_vencimiento date NOT NULL,
+    estado varchar(20) DEFAULT('Activa') NOT NULL
+);
 
 CREATE TABLE pedidos(
     id_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -269,7 +270,7 @@ CREATE TABLE pedidos(
     fecha_creacion timestamp DEFAULT(current_timestamp) NOT NULL,
     fecha_finalizacion timestamp,
     estado varchar(20) DEFAULT('Pendiente') NOT NULL,
-    entrega_domicilio integer DEFAULT(0) NOT NULL
+    entrega_domicilio integer NOT NULL
 );
 
 CREATE TABLE envios(
@@ -281,3 +282,178 @@ CREATE TABLE envios(
     observaciones varchar(500) NOT NULL,
     estado varchar(20) DEFAULT('En preparacion') NOT NULL
 );
+
+-- Inserts de prueba en todas las tablas
+-- USUARIOS
+INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrador)
+VALUES('admin_08', 'secretpassword',DEFAULT, '/img/usuarios', 1);
+
+INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrador)
+VALUES('oscar1', '12345',DEFAULT, '/img/usuarios', 0);
+
+-- PERSONAS
+
+-- CLIENTES
+INSERT INTO clientes(dni, rtn, primer_nombre, segundo_nombre,
+    primer_apellido, segundo_apellido, fecha_nacimiento, telefono, correo, estado)
+VALUES ('0801200011111', '99999999999999', 'Oscar', 'Miguel',
+    'Velasquez', 'Mendoza', '19990201', '33339999',
+    'oscar@gmail.com', 1);
+
+-- USUARIOS_CLIENTES
+INSERT INTO usuarios_clientes(id_usuario, id_cliente, ultimo_acceso)
+VALUES (2, 1, '20261114');
+
+-- PAISES
+INSERT INTO paises(nombre)
+VALUES ('Honduras');
+
+INSERT INTO paises(nombre)
+VALUES ('Estados Unidos');
+
+-- DEPARTAMENTOS
+INSERT INTO departamentos(id_pais, nombre)
+VALUES (1, 'Francisco Morazan');
+
+-- CIUDADES
+INSERT INTO ciudades(id_departamento, nombre, codigo_postal)
+VALUES (1, 'Distrito Central', '11101');
+
+-- DIRECCIONES
+INSERT INTO direcciones(id_ciudad, calle, referencias)
+VALUES (1, 'Boulevard Suyapa', 'Torre Metropolis, Segundo piso');
+
+INSERT INTO direcciones(id_ciudad, calle, referencias)
+VALUES (1, 'Residencias Las Uvas', 'Casa numero 9999');
+
+INSERT INTO direcciones(id_ciudad, calle, referencias)
+VALUES (1, 'Anillo periferico', 'Atras de la gasolinera DOS');
+
+-- DIRECCIONES_CLIENTES
+INSERT INTO direcciones_clientes(id_direccion, id_cliente, predeterminada)
+VALUES (2, 1, 1);
+
+-- CATEGORIAS
+INSERT INTO categorias(nombre, descripcion)
+VALUES ('Laptops', 'Computadoras portatiles de alto rendimiento');
+
+-- MARCAS
+INSERT INTO marcas(id_pais, nombre)
+VALUES (2, 'Dell');
+
+-- PRODUCTOS
+INSERT INTO productos(id_categoria, id_marca, codigo_sku, modelo, precio_costo,
+    precio_venta, stock, url_img, estado)
+VALUES (1, 1, 'LAP00000', 'Latitude 5420', 8999.00,
+    9500.00, 10, '/img/productos', 1);
+
+-- ESPECIFICACIONES
+-- Cada especificacion es una entrada en la tabla, distinta para cada producto
+INSERT INTO especificaciones(id_producto, especificacion)
+VALUES (1, 'Color: Negro'),
+    (1, 'Tipo disco: SSD'),
+    (1, 'Capacidad disco: 512GB'),
+    (1, 'Marca CPU: Intel'),
+    (1, 'CPU: Core i5-1145G7'),
+    (1, 'Tipo memoria RAM: DDR4'),
+    (1, 'Cantidad memoria RAM: 16GB'),
+    (1, 'Anio lanzamiento: 2021'),
+    (1, 'Tamano pantalla: 14"'),
+    (1, 'Resolucion pantalla: 1920x1080p'),
+    (1, 'Bateria: 4 celdas 63WHr'),
+    (1, 'Sistema operativo: Windows 11 Pro');
+
+-- NUMEROS_SERIE
+-- Cada numero de serie corresponde a una unidad en el stock del producto
+INSERT INTO numeros_serie(id_producto, numero_serie)
+VALUES (1, 'ABCD000'),
+    (1, 'ABCD001'),
+    (1, 'ABCD002'),
+    (1, 'ABCD003'),
+    (1, 'ABCD004'),
+    (1, 'ABCD005'),
+    (1, 'ABCD006'),
+    (1, 'ABCD007'),
+    (1, 'ABCD008'),
+    (1, 'ABCD009');
+
+-- PROVEEDORES
+INSERT INTO proveedores(id_direccion, rtn, nombre, telefono, correo, estado)
+VALUES (3, '11111111111111', 'Informatica Mayoreo', '22227777',
+    'informatica@gmail.com', 1);
+
+-- COMPRAS
+INSERT INTO compras(id_proveedor, numero_compra, subtotal, monto_isv, total)
+VALUES (1, '000011223344', 17998.00, 2699.7, 20697.7);
+
+-- DETALLES_COMPRAS
+INSERT INTO detalles_compras(id_compra, id_producto, cantidad, precio_compra, subtotal)
+VALUES (1, 1, 2, 8999.00, 17998.00);
+
+-- CARRITOS
+INSERT INTO carritos(id_usuario, subtotal, monto_isv, total)
+VALUES (2, 19000.00, 2850.00, 21850.00);
+
+-- DETALLES_CARITOS
+INSERT INTO detalles_carritos(id_carrito, id_producto, cantidad, precio_venta, subtotal)
+VALUES (1, 1, 2, 9500.00, 19000.00);
+
+-- METODOS_PAGO
+INSERT INTO metodos_pago(nombre, descripcion)
+VALUES ('VISA', 'Pago con tarjeta');
+
+--SUCURSALES
+INSERT INTO sucursales(id_direccion, hora_apertura, hora_cierre, telefono, estado)
+VALUES (1, '08:00', '16:00', '33558899', 1);
+
+-- REPARTIDORES
+INSERT INTO repartidores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+    fecha_nacimiento, telefono)
+VALUES ('0505199200000', 'Rodrigo', 'Sebastian', 'Molina',
+    'Perdomo', '19920202', '99554433');
+
+-- VENDEDORES
+INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+    fecha_nacimiento, telefono)
+VALUES ('0804198000000', 'Jose', 'Antonio', 'Ramirez',
+    'Ferrari', '19800101', '96695445');
+
+-- COMPROBANTES_FISCALES
+INSERT INTO comprobantes_fiscales(correlativo_minimo, correlativo_maximo, fecha_limite)
+VALUES ('000-001-01-00000001', '000-001-01-00000050', '20271212');
+
+-- FACTURAS
+INSERT INTO facturas(id_comprobante_fiscal, id_sucursal, id_vendedor, id_cliente, numero_factura,
+    importe_exonerado, importe_exento, importe_gravado, descuentos, subtotal, monto_isv,
+    total)
+VALUES (1, 1, 1, 1, '000-001-01-00000002',
+    0.00, 0.00, 19000.00, 0.00, 19000.00,
+    2850.00, 21850.00);
+
+-- DETALLES_FACTURA
+INSERT INTO detalles_factura(id_factura, id_numero_serie, precio_venta, descuento, monto_descuento)
+VALUES (1, 1, 9500.00, 0.00, 0.00),
+    (1, 2, 9500.00, 0.00, 0.00);
+
+-- GARANTIAS
+INSERT INTO garantias(id_cliente, id_numero_serie, fecha_vencimiento)
+VALUES (1, 1, '20271114'),
+    (1, 2, '20271114');
+
+-- PEDIDOS
+INSERT INTO pedidos(id_factura, id_metodo_pago, fecha_finalizacion, entrega_domicilio)
+VALUES (1, 1, '20271114 17:00', 1);
+
+-- ENVIOS
+INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones)
+VALUES (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
+
+-- CONSULTAS DE EJEMPLO
+-- JOINS
+SELECT C.primer_nombre, C.primer_apellido, U.nombre AS NombreUsuario, UC.ultimo_acceso FROM clientes AS C
+INNER JOIN usuarios_clientes AS UC ON UC.id_cliente = C.id_cliente
+INNER JOIN usuarios AS U ON U.id_usuario = UC.id_usuario;
+
+SELECT SN.numero_serie, SN.disponible, P.codigo_sku, P.modelo, M.nombre AS Marca FROM numeros_serie AS SN
+INNER JOIN productos AS P ON P.id_producto = SN.id_producto
+INNER JOIN marcas AS M ON M.id_marca = P.id_marca;
