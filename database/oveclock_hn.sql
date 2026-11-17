@@ -115,6 +115,18 @@ CREATE TABLE productos(
     estado boolean NOT NULL
 );
 
+CREATE TABLE promociones(
+
+    id_promocion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_producto integer REFERENCES productos(id_producto) ON DELETE CASCADE,
+    fecha_inicio date NOT NULL,
+    fecha_vencimiento date NOT NULL,
+    porcentaje_descuento decimal(3,2) NOT NULL,
+    estado boolean NOT NULL,
+    CONSTRAINT chk_fechas_promocion CHECK (fecha_vencimiento > fecha_inicio)
+    
+);
+
 CREATE TABLE especificaciones(
     id_especificacion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_producto integer REFERENCES productos(id_producto) ON DELETE CASCADE,
