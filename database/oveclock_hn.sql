@@ -441,7 +441,7 @@ INSERT INTO metodos_pago(nombre, descripcion, condicion_pago)
 VALUES ('VISA', 'Pago con tarjeta', DEFAULT);
 
 INSERT INTO metodos_pago(nombre, descripcion, condicion_pago) 
-VALUES  ('Efectivo', 'Pago contra entrega o en caja', 'Contado'),
+VALUES  ('Efectivo', 'Pago en caja', 'Contado'),
         ('Transferencia Bancaria', 'Depósito directo a cuenta', 'Contado')
 
 --SUCURSALES
