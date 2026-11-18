@@ -21,6 +21,14 @@ Windows: .\venv\Scripts\activate
 Mac/Linux: source venv/bin/activate
 ```
 
+Además, se debe crear un archivo .env con las respectivas variables de entorno de configuración de Django y la base de datos PostgreSQL
+Configuracion en el archivo .env
+```Bash
+SECRET_KEY=django-insecure-e047zwv)#sz(8psnoidf=or5tv1ii43^7$=nqaw@%#1v(sl(87
+DEBUG=True
+DATABASE_URL=postgresql://localhost:5432/overclock_hn?user=postgres&password=OverClock_HN_IIIPAC_2026.
+```
+
 **3. Instalar Dependencias**
 
 ```Bash
