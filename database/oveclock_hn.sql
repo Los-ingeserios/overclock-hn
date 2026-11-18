@@ -450,11 +450,25 @@ INSERT INTO sucursales(id_direccion, rtn, correo, hora_apertura, hora_cierre,
 VALUES (1, '08012026111111','info@overclock.hn','08:00', '16:00',
     '33558899', '20261001', TRUE);
 
+INSERT INTO sucursales(id_direccion, rtn, correo, hora_apertura, hora_cierre,
+    telefono, fecha_inauguracion, estado)
+VALUES  (2, '08654564564654', 'info@overclock.hn', '08:30', '16:30',
+    '32128899', '2024-02-19', FALSE),
+        (3, '08019999888877', 'sur@overclock.hn', '09:00', '17:00',
+    '23331122', '2024-05-10', TRUE);
+
 -- REPARTIDORES
 INSERT INTO repartidores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
-    fecha_nacimiento, telefono, estado)
+     fecha_nacimiento, telefono, estado)
 VALUES ('0505199200000', 'Rodrigo', 'Sebastian', 'Molina',
     'Perdomo', '19920202', '99554433', TRUE);
+
+INSERT INTO repartidores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+     fecha_nacimiento, telefono, estado) 
+VALUES ('0801199512347', 'Carlos', 'Eduardo', 'Flores', 'Mejía',
+ '1995-03-12', '91112233', TRUE),
+('0501199198764', 'Mario', 'Alberto', 'Reyes', 'Zelaya', '1991-08-22', '92223344', TRUE),
+('0801199344557', 'Héctor', 'Josué', 'Villeda', 'Navarro', '1993-12-05', '94445566', FALSE);
 
 -- VENDEDORES
 INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
@@ -462,10 +476,21 @@ INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segu
 VALUES ('0804198000000', 'Jose', 'Antonio', 'Ramirez',
     'Ferrari', '19800101', '96695445', TRUE);
 
+INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+ fecha_nacimiento, telefono, estado) 
+ VALUES ('0801198901234', 'Sofía', 'Alejandra', 'Martínez', 'Ríos', '19890415', '95556677', TRUE),
+        ('0501199256789', 'Ricardo', 'David', 'Guevara', 'Ponce', '19920920', '96667788', TRUE),
+        ('0801199433221', 'Gabriela', 'Nicole', 'Hernández', 'Díaz', '19941103', '97778899', FALSE);
+
 -- COMPROBANTES_FISCALES
 INSERT INTO comprobantes_fiscales(cai, correlativo_minimo, correlativo_maximo, fecha_limite)
 VALUES ('ABCD01-EFGH02-IJKL03-MNOP04-QRST05-06', '000-001-01-00000001',
     '000-001-01-00000050', '20271212');
+
+INSERT INTO comprobantes_fiscales(cai, correlativo_minimo, correlativo_maximo, fecha_limite) 
+VALUES  ('123456-7890AB-CDEF12-345678-90ABCD-EF', '000-001-01-00000001', '000-001-01-00000100', '20281231'),
+        ('ABCDEF-123456-7890AB-CDEF12-345678-01', '000-002-01-00000001', '000-002-01-00000050', '20280630'),
+        ('987654-3210ZY-XWVU98-765432-10ZYXW-99', '000-003-01-00000001', '000-003-01-00000200', '20290315');
 
 -- FACTURAS
 INSERT INTO facturas(id_comprobante_fiscal, id_sucursal, id_vendedor, id_cliente, id_metodo_pago,
@@ -475,22 +500,46 @@ VALUES (1, 1, 1, 1, 1,
     '000-001-01-00000002', 0.00, 0.00, 19000.00,
     0.00, 19000.00,2850.00, 21850.00);
 
+INSERT INTO facturas(id_comprobante_fiscal, id_sucursal, id_vendedor, id_cliente, id_metodo_pago,
+    numero_factura, importe_exonerado, importe_exento, importe_gravado,
+     descuentos, subtotal, monto_isv, total) VALUES 
+(1, 1, 2, 2, 1, '000-001-01-00000003', 0.00, 0.00, 8500.00, 0.00, 8500.00, 1275.00, 9775.00),
+(2, 2, 3, 3, 2, '000-002-01-00000002', 0.00, 0.00, 12000.00, 200.00, 11800.00, 1770.00, 13570.00),
+(3, 1, 1, 1, 3, '000-003-01-00000003', 0.00, 0.00, 5400.00, 0.00, 5400.00, 810.00, 6210.00);
+
 -- DETALLES_FACTURA
 INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
 VALUES (1, 1, 9500.00, 2, 0.00, 0.00, 19000.00),
+
+INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
+VALUES (3, 4, 4500.00, 5, 0.00, 0.00, 9000.00),
+
+
 
 -- GARANTIAS
 INSERT INTO garantias(id_cliente, id_producto, fecha_vencimiento)
 VALUES (1, 1, '20271114');
 
+INSERT INTO garantias(id_cliente, id_producto, fecha_vencimiento) 
+VALUES  (2, 2, '20280515'),
+        (3, 3, '20280820');
+
 -- PEDIDOS
 INSERT INTO pedidos(id_factura, fecha_finalizacion, entrega_domicilio)
 VALUES (1,  '20271114 17:00', 1);
+
+INSERT INTO pedidos(id_factura, fecha_finalizacion, entrega_domicilio) 
+VALUES  (2, '20261116 14:00', 1),
+        (3, '20261117 16:30', 0);
 
 -- ENVIOS
 INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones)
 VALUES (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
 
+INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones) 
+VALUES  (2, 2, 4, 'ENV0000000000003', 'Dejar en la puerta principal y tocar timbre'),
+        (3, 3, 2, 'ENV0000000000004', 'Entrega en oficina corporativa, preguntar por recepción'),
+        (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
 
 -- CONSULTAS DE EJEMPLO
 -- JOINS
@@ -498,6 +547,8 @@ VALUES (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
 SELECT C.primer_nombre, C.primer_apellido, U.nombre AS NombreUsuario, UC.ultimo_acceso FROM clientes AS C
 INNER JOIN usuarios_clientes AS UC ON UC.id_cliente = C.id_cliente
 INNER JOIN usuarios AS U ON U.id_usuario = UC.id_usuario;
+
+
 
 -- Mostrar direccion completamente de los proveedores que tienen una direccion
 SELECT PROV.nombre AS proveedor, P.nombre as pais, DEP.nombre AS departamento, C.nombre AS ciudad, D.calle as calle,
@@ -528,6 +579,41 @@ INNER JOIN detalles_factura AS DF ON DF.id_factura = F.id_factura
 INNER JOIN productos AS P ON P.id_producto = DF.id_producto;
 
 SELECT * FROM vw_factura_completa;
+
+
+-- PRODUCTOS MAS VENDIDOS POR CADA CATEGORIA
+WITH Resumen_Ventas_Productos AS (
+    
+SELECT   P.id_producto,P.modelo AS Producto ,C.id_categoria,
+         C.nombre AS Categoria , SUM(DF.cantidad) AS Cantidades_Vendidas,
+         SUM(DF.subtotal) AS Ganancias_Totales  FROM productos P
+INNER JOIN categorias C ON P.id_categoria = C.id_categoria
+INNER JOIN detalles_factura DF ON P.id_producto = DF.id_producto
+GROUP BY P.id_producto,P.modelo , C.id_categoria, C.nombre 
+)
+
+-- MOSTRAR LOS PRODUCTOS MAS VENDIDOS 
+SELECT * FROM Resumen_Ventas_Productos
+ORDER BY Cantidades_Vendidas DESC 
+
+WITH Productos_Agotados AS (
+   -- Todos los productos agotados pero activos
+    SELECT 
+        P.id_producto,
+        P.codigo_sku,
+        M.nombre AS marca,
+        C.nombre AS categoria,
+        P.modelo AS producto,
+        P.precio_venta,
+        P.stock
+    FROM productos P
+    INNER JOIN marcas M ON P.id_marca = M.id_marca
+    INNER JOIN categorias C ON P.id_categoria = C.id_categoria
+    WHERE P.stock = 0 AND P.estado = TRUE
+)
+SELECT * FROM Productos_Agotados 
+ORDER BY categoria ASC, producto ASC
+
 
 /* CREATE TABLE numeros_serie(
     id_numero_serie integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
