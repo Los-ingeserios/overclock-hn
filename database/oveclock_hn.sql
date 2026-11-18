@@ -292,6 +292,10 @@ VALUES('admin_08', 'secretpassword',DEFAULT, '/img/usuarios', TRUE);
 INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrador)
 VALUES('oscar1', '12345',DEFAULT, '/img/usuarios', DEFAULT);
 
+INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrador) VALUES
+('maria_j', 'abc12345', DEFAULT, '/img/usuarios', DEFAULT),
+('carlos_g', 'pass789', DEFAULT, '/img/usuarios', DEFAULT);
+
 -- PERSONAS
 
 -- CLIENTES
@@ -301,9 +305,19 @@ VALUES ('0801200011111', '99999999999999', 'Oscar', 'Miguel',
     'Velasquez', 'Mendoza', '19990201', '33339999',
     'oscar@gmail.com', NULL, TRUE);
 
+INSERT INTO clientes(dni, rtn, primer_nombre, segundo_nombre, primer_apellido,
+ segundo_apellido, fecha_nacimiento, telefono, correo, razon_social, estado) 
+ VALUES ('0801265454798', '78934651230147', 'Maria', 'Jose', 'Lagos', NULL,
+  '1998-03-14', '84264208', 'Maria123@yahoo.com', 'Soluciones Tecnológicas CG', TRUE),
+('0801199512345', NULL, 'Carlos', 'Alberto', 'Gómez', 'Paz', '1995-05-12', '98887766'
+, 'carlos.gomez@gmail.com', NULL, TRUE);
+
 -- USUARIOS_CLIENTES
 INSERT INTO usuarios_clientes(id_usuario, id_cliente, ultimo_acceso)
 VALUES (2, 1, '20261114');
+INSERT INTO usuarios_clientes(id_usuario, id_cliente, ultimo_acceso) VALUES
+(3, 2, '2026-11-15 14:20:00');
+
 
 -- PAISES
 INSERT INTO paises(nombre)
@@ -312,13 +326,27 @@ VALUES ('Honduras');
 INSERT INTO paises(nombre)
 VALUES ('Estados Unidos');
 
+INSERT INTO paises(nombre) 
+VALUES  ('México'),
+        ('Colombia'),
+        ('Venezuela');
+
 -- DEPARTAMENTOS
 INSERT INTO departamentos(id_pais, nombre)
 VALUES (1, 'Francisco Morazan');
 
+INSERT INTO departamentos(id_pais, nombre) 
+VALUES (1, 'Cortes'),
+       (3, 'Jalisco'),
+       (2, 'Chicago');
+
 -- CIUDADES
 INSERT INTO ciudades(id_departamento, nombre, codigo_postal)
 VALUES (1, 'Distrito Central', '11101');
+
+INSERT INTO ciudades(id_departamento, nombre, codigo_postal) VALUES 
+(2, 'San Pedro Sula', '21101'),
+(3, 'Guadalajara', '44100');
 
 -- DIRECCIONES
 INSERT INTO direcciones(id_ciudad, calle, referencias)
@@ -330,17 +358,32 @@ VALUES (1, 'Residencias Las Uvas', 'Casa numero 9999');
 INSERT INTO direcciones(id_ciudad, calle, referencias)
 VALUES (1, 'Anillo periferico', 'Atras de la gasolinera DOS');
 
+INSERT INTO direcciones(id_ciudad, calle, referencias)
+VALUES (2, 'Avenida Circunvalacion', 'Frente a plaza cenit');
+
 -- DIRECCIONES_CLIENTES
 INSERT INTO direcciones_clientes(id_direccion, id_cliente, predeterminada)
 VALUES (2, 1, TRUE);
+
+INSERT INTO direcciones_clientes(id_direccion, id_cliente, predeterminada) 
+VALUES (4, 2, TRUE);
 
 -- CATEGORIAS
 INSERT INTO categorias(nombre, descripcion)
 VALUES ('Laptops', 'Computadoras portatiles de una variedad de gamas');
 
+INSERT INTO categorias(nombre, descripcion)
+VALUES  ('Laptops', 'Computadoras portatiles de una variedad de gamas'),
+        ('Monitores', 'Pantallas de alta tasa de refresco para oficina y gaming'),
+        ('Almacenamiento', 'Discos de estado sólido y unidades externas');
+
 -- MARCAS
 INSERT INTO marcas(id_pais, nombre)
 VALUES (2, 'Dell');
+
+INSERT INTO marcas(id_pais, nombre) 
+VALUES  (1, 'HP'),
+        (2, 'Kingston');
 
 -- PRODUCTOS
 INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
@@ -349,6 +392,15 @@ INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
 VALUES (1, 1, 'LAP00000', 'ABCD0000EFG','Latitude 5420',
     8999.00, 0.00,9500.00, 10, '20261116',
     '/img/productos', TRUE);
+
+INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
+            precio_costo, precio_descuento, precio_venta, stock, fecha_ingreso, url_img, estado) 
+VALUES   (1, 1, 'LAP00000', 'ABCD0000EFG', 'Latitude 5420', 8999.00, 0.00, 9500.00, 10,
+        '2026-11-16', '/img/productos', TRUE),
+        (2, 2, 'MON00001', 'LOTEHP0199', 'Monitor 24 pulg FHD', 3500.00, 0.00, 4200.00, 15,
+         '2026-11-16', '/img/productos', TRUE),
+        (3, 3, 'SSD00002', 'LOTESSD888', 'SSD NVMe 1TB', 1200.00, 0.00, 1500.00, 25,
+        '2026-11-16', '/img/productos', TRUE);
 
 -- ESPECIFICACIONES
 -- Cada especificacion es una entrada en la tabla, distinta para cada producto
@@ -364,12 +416,17 @@ VALUES (1, 'Color: Negro'),
     (1, 'Tamano pantalla: 14"'),
     (1, 'Resolucion pantalla: 1920x1080p'),
     (1, 'Bateria: 4 celdas 63WHr'),
-    (1, 'Sistema operativo: Windows 11 Pro');
+    (1, 'Sistema operativo: Windows 11 Pro')
+    (2, 'Resolucion: 1920x1080'),
+    (2, 'Tasa de refresco: 75Hz'),
+    (2, 'Puertos: HDMI y VGA');;
 
 -- PROVEEDORES
 INSERT INTO proveedores(id_direccion, rtn, nombre, telefono, correo, estado)
-VALUES (3, '11111111111111', 'Informatica Mayoreo', '22227777',
-    'informatica@gmail.com', TRUE);
+VALUES  (3, '11111111111111', 'Informatica Mayoreo', '22227777',
+        'informatica@gmail.com', TRUE),
+        (4, '12345678901234', 'Tecnologia Avanzada S.A.', '22334455',
+         'ventas@tecnoavanzada.hn', TRUE);
 
 -- COMPRAS
 INSERT INTO compras(id_proveedor, numero_compra, subtotal, monto_isv, total)
@@ -382,6 +439,10 @@ VALUES (1, 1, 2, 8999.00, 17998.00);
 -- METODOS_PAGO
 INSERT INTO metodos_pago(nombre, descripcion, condicion_pago)
 VALUES ('VISA', 'Pago con tarjeta', DEFAULT);
+
+INSERT INTO metodos_pago(nombre, descripcion, condicion_pago) 
+VALUES  ('Efectivo', 'Pago contra entrega o en caja', 'Contado'),
+        ('Transferencia Bancaria', 'Depósito directo a cuenta', 'Contado')
 
 --SUCURSALES
 INSERT INTO sucursales(id_direccion, rtn, correo, hora_apertura, hora_cierre,
@@ -416,7 +477,7 @@ VALUES (1, 1, 1, 1, 1,
 
 -- DETALLES_FACTURA
 INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
-VALUES (1, 1, 9500.00, 2, 0.00, 0.00, 19000.00);
+VALUES (1, 1, 9500.00, 2, 0.00, 0.00, 19000.00),
 
 -- GARANTIAS
 INSERT INTO garantias(id_cliente, id_producto, fecha_vencimiento)
@@ -429,6 +490,7 @@ VALUES (1,  '20271114 17:00', 1);
 -- ENVIOS
 INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones)
 VALUES (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
+
 
 -- CONSULTAS DE EJEMPLO
 -- JOINS
