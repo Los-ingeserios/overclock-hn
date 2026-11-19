@@ -130,6 +130,7 @@ CREATE TABLE promociones(
     CONSTRAINT chk_fechas_promocion CHECK (fecha_vencimiento > fecha_inicio)
 );
 
+
 CREATE TABLE especificaciones(
     id_especificacion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_producto integer REFERENCES productos(id_producto) ON DELETE CASCADE,
