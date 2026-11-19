@@ -322,7 +322,7 @@ CREATE TABLE pedidos(
 
 
 CREATE TABLE detalles_pagos(
-    id_detalles_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_detalles_pagos integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE RESTRICT,
     id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
     id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
