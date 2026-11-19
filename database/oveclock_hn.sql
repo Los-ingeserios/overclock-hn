@@ -107,7 +107,7 @@ CREATE TABLE productos(
     precio_costo decimal(19, 4) NOT NULL,
     precio_descuento decimal(19, 4) NOT NULL,
     precio_venta decimal(19, 4) NOT NULL,
-    stock int NOT NULL,
+    stock int NOT NULL check(stock >= 0), -- Incorporacion de check para validar que el stock no sea negativo 
     fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
     url_img varchar(100),
     estado boolean NOT NULL
@@ -117,7 +117,6 @@ CREATE TABLE tipo_promocion(
     id_tipo_promocion  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     detalles text NOT NULL
 );
-
 
 CREATE TABLE promociones(
 
@@ -129,7 +128,6 @@ CREATE TABLE promociones(
     porcentaje_descuento decimal(3,2) NOT NULL,
     estado boolean NOT NULL,
     CONSTRAINT chk_fechas_promocion CHECK (fecha_vencimiento > fecha_inicio)
-    
 );
 
 CREATE TABLE especificaciones(
@@ -154,7 +152,7 @@ CREATE TABLE compras(
     id_compra integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_proveedor integer REFERENCES proveedores(id_proveedor) ON DELETE RESTRICT,
     numero_compra varchar(20) UNIQUE NOT NULL,
-    fecha_compra timestamp DEFAULT(current_timestamp) UNIQUE NOT NULL,
+    fecha_compra timestamp DEFAULT(current_timestamp) NOT NULL, --Eliminacion del UNIQUE, ya que las compras si pueden compartir fecha_compra, mas no los demas detalles
     subtotal decimal(19, 4) NOT NULL,
     isv decimal (3, 2) DEFAULT(0.15) NOT NULL,
     monto_isv decimal(19, 4) NOT NULL,
