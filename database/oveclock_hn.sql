@@ -245,23 +245,6 @@ CREATE TABLE comprobantes_fiscales(
     fecha_limite date NOT NULL
 );
 
-CREATE TABLE detalles_pedido(
-    id_detalles_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
-    id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
-    id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
-    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE SET NULL,
-    numero_factura varchar(50) UNIQUE NOT NULL,
-    fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
-    importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
-    importe_exento decimal(19, 4) NOT NULL, -- Monto donde no se aplica impuestos debido al tipo de servicio
-    importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
-    descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
-    subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
-    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
-    total decimal(19, 4) NOT NULL -- Total final a pagar
-);
 
 CREATE TABLE facturas(
     id_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -312,9 +295,28 @@ CREATE TABLE pedidos(
     entrega_domicilio integer NOT NULL
 );
 
+
+CREATE TABLE detalles_pedido(
+    id_detalles_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE RESTRICT,
+    id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
+    id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
+    id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE SET NULL,
+    numero_factura varchar(50) UNIQUE NOT NULL,
+    fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
+    importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
+    importe_exento decimal(19, 4) NOT NULL, -- Monto donde no se aplica impuestos debido al tipo de servicio
+    importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
+    descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
+    subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
+    total decimal(19, 4) NOT NULL -- Total final a pagar
+);
 CREATE TABLE detalles_pagos(
     id_detalles_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
     id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE, 
     monto decimal(10,4) NOT NULL check(monto > 0), 
     fecha_pago date DEFAULT current_date
