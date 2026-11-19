@@ -113,9 +113,16 @@ CREATE TABLE productos(
     estado boolean NOT NULL
 );
 
+CREATE TABLE tipo_promocion(
+    id_tipo_promocion  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    detalles text NOT NULL
+);
+
+
 CREATE TABLE promociones(
 
     id_promocion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_tipo_promocion integer REFERENCES tipo_promocion(id_tipo_promocion) ON DELETE CASCADE,
     id_producto integer REFERENCES productos(id_producto) ON DELETE CASCADE,
     fecha_inicio date NOT NULL,
     fecha_vencimiento date NOT NULL,
@@ -167,7 +174,7 @@ CREATE TABLE metodos_pago(
     id_metodo_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre varchar(100) NOT NULL,
     descripcion varchar(500),
-    condicion_pago varchar(20) DEFAULT('Contado') NOT NULL
+    condicion_pago varchar(20) NOT NULL
 );
 
 CREATE TABLE sucursales(
@@ -185,8 +192,22 @@ CREATE TABLE sucursales(
     estado boolean NOT NULL
 );
 
+CREATE TABLE empresas_repartidoras(
+    
+    id_empresa integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_direccion integer REFERENCES direcciones(id_direccion) ON DELETE RESTRICT,
+    rtn varchar(14) UNIQUE NOT NULL
+        CHECK(char_length(rtn) = 14),
+    nombre varchar(100) NOT NULL,
+    correo varchar(50) check(correo like '%@.%')NOT NULL,
+    telefono varchar(20) NOT NULL,
+    fecha_inauguracion date check(fecha_inauguracion < CURRENT_DATE) NOT NULL,
+    estado boolean NOT NULL
+);
+
 CREATE TABLE repartidores(
     id_repartidor integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_empresa integer REFERENCES empresas_repartidoras(id_empresa) ON DELETE CASCADE,
     dni varchar(13) UNIQUE NOT NULL
         CHECK(length(Dni) = 13),
     primer_nombre varchar(100) NOT NULL,
@@ -207,16 +228,16 @@ CREATE TABLE vendedores(
     segundo_nombre varchar(100),
     primer_apellido varchar(100) NOT NULL,
     segundo_apellido varchar(100),
-    fecha_nacimiento date NOT NULL
+    fecha_contratacion date check(fecha_contratacion <= CURRENT_DATE) NOT NULL,  
+    fecha_nacimiento date NOT NULL,
         CHECK ((extract(YEAR from current_date) - extract(YEAR from fecha_nacimiento)) >= 18),
     telefono varchar(20) UNIQUE NOT NULL,
     estado boolean NOT NULL
 );
 
+
 CREATE TABLE comprobantes_fiscales(
     id_comprobante_fiscal integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    cai varchar(37) UNIQUE NOT NULL -- Un cai esta formado por grupos de 6 digitos separados, haciendo un total de 32
-        CHECK(length(cai) = 37), -- La longitud de 37 incluye los 32 digitos mas 5 guiones de separacion
     correlativo_minimo varchar(19) UNIQUE NOT NULL -- Inicio del rango de numeros factura disponibles para la empresa
         CHECK(length(correlativo_minimo) = 19),
     correlativo_maximo varchar(19) UNIQUE NOT NULL -- Fin del rango de numeros de factura
@@ -224,9 +245,28 @@ CREATE TABLE comprobantes_fiscales(
     fecha_limite date NOT NULL
 );
 
+CREATE TABLE detalles_pedido(
+    id_detalles_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
+    id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
+    id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE SET NULL,
+    numero_factura varchar(50) UNIQUE NOT NULL,
+    fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
+    importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
+    importe_exento decimal(19, 4) NOT NULL, -- Monto donde no se aplica impuestos debido al tipo de servicio
+    importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
+    descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
+    subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
+    total decimal(19, 4) NOT NULL -- Total final a pagar
+);
+
 CREATE TABLE facturas(
     id_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_comprobante_fiscal integer REFERENCES comprobantes_fiscales(id_comprobante_fiscal) ON DELETE RESTRICT,
+    cai varchar(37) UNIQUE NOT NULL -- Un cai esta formado por grupos de 6 digitos separados, haciendo un total de 32
+        CHECK(length(cai) = 37), -- La longitud de 37 incluye los 32 digitos mas 5 guiones de separacion
     id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
     id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
     id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
@@ -270,6 +310,15 @@ CREATE TABLE pedidos(
     fecha_finalizacion timestamp,
     estado varchar(20) DEFAULT('Pendiente') NOT NULL,
     entrega_domicilio integer NOT NULL
+);
+
+CREATE TABLE detalles_pagos(
+    id_detalles_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT
+    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE, 
+    monto decimal(10,4) NOT NULL check(monto > 0), 
+    fecha_pago date DEFAULT current_date
+
 );
 
 CREATE TABLE envios(
