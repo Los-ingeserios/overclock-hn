@@ -164,7 +164,7 @@ CREATE TABLE detalles_compras(
     id_compra integer REFERENCES compras(id_compra) ON DELETE CASCADE,
     id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
     cantidad integer NOT NULL,
-    precio_compra decimal(19, 4) NOT NULL,
+    precio_compra decimal(19, 4) check(precio_compra > 0) NOT NULL,
     subtotal decimal(19, 4) NOT NULL
 );
 
@@ -264,6 +264,14 @@ CREATE TABLE facturas(
     total decimal(19, 4) NOT NULL -- Total final a pagar
 );
 
+CREATE TABLE pagos(
+    id_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
+    id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
+    total decimal(19,4) check(total > 0) NOT NULL,
+    estado varchar(20) NOT NULL
+);
+
 CREATE TABLE detalles_factura(
     id_detalle_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
@@ -312,13 +320,13 @@ CREATE TABLE detalles_pedido(
     monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
     total decimal(19, 4) NOT NULL -- Total final a pagar
 );
+
 CREATE TABLE detalles_pagos(
     id_detalles_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
     id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE, 
-    monto decimal(10,4) NOT NULL check(monto > 0), 
+    monto_total decimal(19,4) check(monto_total > 0) NOT NULL
     fecha_pago date DEFAULT current_date
-
 );
 
 CREATE TABLE envios(
