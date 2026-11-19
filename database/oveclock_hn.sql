@@ -246,12 +246,12 @@ CREATE TABLE comprobantes_fiscales(
 
 CREATE TABLE facturas(
     id_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_comprobante_fiscal integer REFERENCES comprobantes_fiscales(id_comprobante_fiscal) ON DELETE RESTRICT,
     cai varchar(37) UNIQUE NOT NULL -- Un cai esta formado por grupos de 6 digitos separados, haciendo un total de 32
         CHECK(length(cai) = 37), -- La longitud de 37 incluye los 32 digitos mas 5 guiones de separacion
     id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
     id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
     id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
-    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE SET NULL,
     numero_factura varchar(50) UNIQUE NOT NULL,
     fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
     importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
