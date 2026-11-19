@@ -37,7 +37,6 @@ CREATE TABLE clientes(
     telefono varchar(20) UNIQUE NOT NULL,
     correo varchar(100) UNIQUE NOT NULL
         CHECK (correo ~~ '%@%'),
-    tarjeta_credito varchar(20) UNIQUE NULL,
     fecha_registro timestamp DEFAULT(current_timestamp) NOT NULL,
     razon_social varchar(50),
     estado boolean NOT NULL
@@ -169,14 +168,6 @@ CREATE TABLE detalles_compras(
     subtotal decimal(19, 4) NOT NULL
 );
 
-CREATE TABLE metodos_pago(
-    id_metodo_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre varchar(100) NOT NULL,
-    descripcion varchar(500),
-    condicion_pago varchar(20) NOT NULL,
-    efectivo boolean NOT NULL
-);
-
 CREATE TABLE detalles_tarjeta(
     id_detalle_tarjeta integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
@@ -184,6 +175,15 @@ CREATE TABLE detalles_tarjeta(
     fecha_vencimiento date NOT NULL,
     tipo_tarjeta varchar(20) DEFAULT 'Credito' 
     check(nombre_tipo = 'Credito' or nombre_tipo = 'Debito')
+);
+
+CREATE TABLE metodos_pago(
+    id_metodo_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_detalle_tarjeta integer REFERENCES detalles_tarjeta(id_detalle_tarjeta) ON DELETE RESTRICT,
+    nombre varchar(100) NOT NULL,
+    descripcion varchar(500),
+    condicion_pago varchar(20) NOT NULL,
+    efectivo boolean NOT NULL
 );
 
 CREATE TABLE sucursales(
