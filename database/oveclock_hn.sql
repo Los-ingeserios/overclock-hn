@@ -121,7 +121,7 @@ CREATE TABLE tipo_promocion(
 CREATE TABLE promociones(
 
     id_promocion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_tipo_promocion integer REFERENCES tipo_promocion(id_tipo_promocion) ON DELETE CASCADE,
+    id_tipo_promocion integer REFERENCES tipo_promocion(id_tipo_promocion) ON DELETE RESTRICT,
     id_producto integer REFERENCES productos(id_producto) ON DELETE CASCADE,
     fecha_inicio date NOT NULL,
     fecha_vencimiento date NOT NULL,
