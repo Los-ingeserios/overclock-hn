@@ -22,8 +22,6 @@ CREATE TABLE usuarios(
     administrador boolean DEFAULT(FALSE) NOT NULL
 );
 
--- CREATE TABLE personas();
-
 CREATE TABLE clientes(
     id_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     dni varchar(13) UNIQUE NOT NULL
@@ -296,8 +294,6 @@ INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrado
 ('maria_j', 'abc12345', DEFAULT, '/img/usuarios', DEFAULT),
 ('carlos_g', 'pass789', DEFAULT, '/img/usuarios', DEFAULT);
 
--- PERSONAS
-
 -- CLIENTES
 INSERT INTO clientes(dni, rtn, primer_nombre, segundo_nombre,
     primer_apellido, segundo_apellido, fecha_nacimiento, telefono, correo, razon_social, estado)
@@ -395,7 +391,7 @@ VALUES (1, 1, 'LAP00000', 'ABCD0000EFG','Latitude 5420',
 
 INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
             precio_costo, precio_descuento, precio_venta, stock, fecha_ingreso, url_img, estado) 
-VALUES   (1, 1, 'LAP00000', 'ABCD0000EFG', 'Latitude 5420', 8999.00, 0.00, 9500.00, 10,
+VALUES   (1, 1, 'LAP00001', 'ABCD0000EFH', 'Latitude 5420', 8999.00, 0.00, 9500.00, 10,
         '2026-11-16', '/img/productos', TRUE),
         (2, 2, 'MON00001', 'LOTEHP0199', 'Monitor 24 pulg FHD', 3500.00, 0.00, 4200.00, 15,
          '2026-11-16', '/img/productos', TRUE),
@@ -416,10 +412,10 @@ VALUES (1, 'Color: Negro'),
     (1, 'Tamano pantalla: 14"'),
     (1, 'Resolucion pantalla: 1920x1080p'),
     (1, 'Bateria: 4 celdas 63WHr'),
-    (1, 'Sistema operativo: Windows 11 Pro')
+    (1, 'Sistema operativo: Windows 11 Pro'),
     (2, 'Resolucion: 1920x1080'),
     (2, 'Tasa de refresco: 75Hz'),
-    (2, 'Puertos: HDMI y VGA');;
+    (2, 'Puertos: HDMI y VGA');
 
 -- PROVEEDORES
 INSERT INTO proveedores(id_direccion, rtn, nombre, telefono, correo, estado)
@@ -442,7 +438,7 @@ VALUES ('VISA', 'Pago con tarjeta', DEFAULT);
 
 INSERT INTO metodos_pago(nombre, descripcion, condicion_pago) 
 VALUES  ('Efectivo', 'Pago en caja', 'Contado'),
-        ('Transferencia Bancaria', 'Depósito directo a cuenta', 'Contado')
+        ('Transferencia Bancaria', 'Depósito directo a cuenta', 'Contado');
 
 --SUCURSALES
 INSERT INTO sucursales(id_direccion, rtn, correo, hora_apertura, hora_cierre,
@@ -484,7 +480,7 @@ INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segu
 
 -- COMPROBANTES_FISCALES
 INSERT INTO comprobantes_fiscales(cai, correlativo_minimo, correlativo_maximo, fecha_limite)
-VALUES ('ABCD01-EFGH02-IJKL03-MNOP04-QRST05-06', '000-001-01-00000001',
+VALUES ('ABCD01-EFGH02-IJKL03-MNOP04-QRST05-06', '000-001-01-00000000',
     '000-001-01-00000050', '20271212');
 
 INSERT INTO comprobantes_fiscales(cai, correlativo_minimo, correlativo_maximo, fecha_limite) 
@@ -509,11 +505,10 @@ INSERT INTO facturas(id_comprobante_fiscal, id_sucursal, id_vendedor, id_cliente
 
 -- DETALLES_FACTURA
 INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
-VALUES (1, 1, 9500.00, 2, 0.00, 0.00, 19000.00),
+VALUES (1, 1, 9500.00, 2, 0.00, 0.00, 19000.00);
 
 INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
-VALUES (3, 4, 4500.00, 5, 0.00, 0.00, 9000.00),
-
+VALUES (3, 4, 4500.00, 5, 0.00, 0.00, 9000.00);
 
 
 -- GARANTIAS
@@ -539,7 +534,7 @@ VALUES (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
 INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones) 
 VALUES  (2, 2, 4, 'ENV0000000000003', 'Dejar en la puerta principal y tocar timbre'),
         (3, 3, 2, 'ENV0000000000004', 'Entrega en oficina corporativa, preguntar por recepción'),
-        (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
+        (1, 1, 2, 'ENV0000000000005', 'Paquete fragil');
 
 -- CONSULTAS DE EJEMPLO
 -- JOINS
@@ -547,8 +542,6 @@ VALUES  (2, 2, 4, 'ENV0000000000003', 'Dejar en la puerta principal y tocar timb
 SELECT C.primer_nombre, C.primer_apellido, U.nombre AS NombreUsuario, UC.ultimo_acceso FROM clientes AS C
 INNER JOIN usuarios_clientes AS UC ON UC.id_cliente = C.id_cliente
 INNER JOIN usuarios AS U ON U.id_usuario = UC.id_usuario;
-
-
 
 -- Mostrar direccion completamente de los proveedores que tienen una direccion
 SELECT PROV.nombre AS proveedor, P.nombre as pais, DEP.nombre AS departamento, C.nombre AS ciudad, D.calle as calle,
@@ -580,21 +573,21 @@ INNER JOIN productos AS P ON P.id_producto = DF.id_producto;
 
 SELECT * FROM vw_factura_completa;
 
-
 -- PRODUCTOS MAS VENDIDOS POR CADA CATEGORIA
 WITH Resumen_Ventas_Productos AS (
     
 SELECT   P.id_producto,P.modelo AS Producto ,C.id_categoria,
          C.nombre AS Categoria , SUM(DF.cantidad) AS Cantidades_Vendidas,
-         SUM(DF.subtotal) AS Ganancias_Totales  FROM productos P
+         SUM(F.total) AS Ganancias_Totales  FROM productos P
 INNER JOIN categorias C ON P.id_categoria = C.id_categoria
 INNER JOIN detalles_factura DF ON P.id_producto = DF.id_producto
-GROUP BY P.id_producto,P.modelo , C.id_categoria, C.nombre 
+INNER JOIN facturas as F ON F.id_factura = DF.id_factura
+GROUP BY P.id_producto,P.modelo , C.id_categoria, C.nombre
 )
 
 -- MOSTRAR LOS PRODUCTOS MAS VENDIDOS 
 SELECT * FROM Resumen_Ventas_Productos
-ORDER BY Cantidades_Vendidas DESC 
+ORDER BY Cantidades_Vendidas DESC;
 
 WITH Productos_Agotados AS (
    -- Todos los productos agotados pero activos
@@ -612,33 +605,4 @@ WITH Productos_Agotados AS (
     WHERE P.stock = 0 AND P.estado = TRUE
 )
 SELECT * FROM Productos_Agotados 
-ORDER BY categoria ASC, producto ASC
-
-
-/* CREATE TABLE numeros_serie(
-    id_numero_serie integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_producto integer REFERENCES productos(id_producto),
-    -- Numero de serie unico para cada existencia de un producto
-    numero_serie varchar(20) UNIQUE NOT NULL,
-    fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
-    -- Se marca como 0 cuando el producto se ha vendido, indicando que el numero de serie fue utilizado
-    disponible integer DEFAULT(1) NOT NULL
-); */
-
-/* CREATE TABLE carritos(
-    id_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_usuario integer REFERENCES usuarios(id_usuario),
-    subtotal decimal(19, 4) NOT NULL,
-    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL,
-    total decimal(19, 4) NOT NULL
-);
-
-CREATE TABLE detalles_carritos(
-    id_detalle_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_carrito integer REFERENCES carritos(id_carrito),
-    id_producto integer REFERENCES productos(id_producto),
-    cantidad integer NOT NULL,
-    precio_venta decimal(19, 4) NOT NULL,
-    subtotal decimal(19, 4) NOT NULL
-); */
+ORDER BY categoria ASC, producto ASC;
