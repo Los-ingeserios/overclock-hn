@@ -22,8 +22,6 @@ CREATE TABLE usuarios(
     administrador boolean DEFAULT(FALSE) NOT NULL
 );
 
--- CREATE TABLE personas();
-
 CREATE TABLE clientes(
     id_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     dni varchar(13) UNIQUE NOT NULL
@@ -109,11 +107,29 @@ CREATE TABLE productos(
     precio_costo decimal(19, 4) NOT NULL,
     precio_descuento decimal(19, 4) NOT NULL,
     precio_venta decimal(19, 4) NOT NULL,
-    stock int NOT NULL,
+    stock int NOT NULL check(stock >= 0), -- Incorporacion de check para validar que el stock no sea negativo 
     fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
     url_img varchar(100),
     estado boolean NOT NULL
 );
+
+CREATE TABLE tipo_promocion(
+    id_tipo_promocion  integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    detalles text NOT NULL
+);
+
+CREATE TABLE promociones(
+
+    id_promocion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_tipo_promocion integer REFERENCES tipo_promocion(id_tipo_promocion) ON DELETE RESTRICT,
+    id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
+    fecha_inicio date NOT NULL,
+    fecha_vencimiento date NOT NULL,
+    porcentaje_descuento decimal(3,2) NOT NULL,
+    estado boolean NOT NULL,
+    CONSTRAINT chk_fechas_promocion CHECK (fecha_vencimiento > fecha_inicio)
+);
+
 
 CREATE TABLE especificaciones(
     id_especificacion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -137,7 +153,7 @@ CREATE TABLE compras(
     id_compra integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_proveedor integer REFERENCES proveedores(id_proveedor) ON DELETE RESTRICT,
     numero_compra varchar(20) UNIQUE NOT NULL,
-    fecha_compra timestamp DEFAULT(current_timestamp) UNIQUE NOT NULL,
+    fecha_compra timestamp DEFAULT(current_timestamp) NOT NULL, --Eliminacion del UNIQUE, ya que las compras si pueden compartir fecha_compra, mas no los demas detalles
     subtotal decimal(19, 4) NOT NULL,
     isv decimal (3, 2) DEFAULT(0.15) NOT NULL,
     monto_isv decimal(19, 4) NOT NULL,
@@ -149,15 +165,26 @@ CREATE TABLE detalles_compras(
     id_compra integer REFERENCES compras(id_compra) ON DELETE CASCADE,
     id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
     cantidad integer NOT NULL,
-    precio_compra decimal(19, 4) NOT NULL,
+    precio_compra decimal(19, 4) check(precio_compra > 0) NOT NULL,
     subtotal decimal(19, 4) NOT NULL
+);
+
+CREATE TABLE detalles_tarjeta(
+    id_detalle_tarjeta integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
+    numero_tarjeta varchar(20) UNIQUE NOT NULL,
+    fecha_vencimiento date NOT NULL,
+    tipo_tarjeta varchar(20) DEFAULT 'Credito' 
+    check(nombre_tipo = 'Credito' or nombre_tipo = 'Debito')
 );
 
 CREATE TABLE metodos_pago(
     id_metodo_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_detalle_tarjeta integer REFERENCES detalles_tarjeta(id_detalle_tarjeta) ON DELETE RESTRICT,
     nombre varchar(100) NOT NULL,
     descripcion varchar(500),
-    condicion_pago varchar(20) DEFAULT('Contado') NOT NULL
+    condicion_pago varchar(20) NOT NULL,
+    efectivo boolean NOT NULL
 );
 
 CREATE TABLE sucursales(
@@ -175,8 +202,22 @@ CREATE TABLE sucursales(
     estado boolean NOT NULL
 );
 
+CREATE TABLE empresas_repartidoras(
+    
+    id_empresa integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_direccion integer REFERENCES direcciones(id_direccion) ON DELETE RESTRICT,
+    rtn varchar(14) UNIQUE NOT NULL
+        CHECK(char_length(rtn) = 14),
+    nombre varchar(100) NOT NULL,
+    correo varchar(50) check(correo like '%@.%')NOT NULL,
+    telefono varchar(20) NOT NULL,
+    fecha_inauguracion date check(fecha_inauguracion < CURRENT_DATE) NOT NULL,
+    estado boolean NOT NULL
+);
+
 CREATE TABLE repartidores(
     id_repartidor integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_empresa integer REFERENCES empresas_repartidoras(id_empresa) ON DELETE CASCADE,
     dni varchar(13) UNIQUE NOT NULL
         CHECK(length(Dni) = 13),
     primer_nombre varchar(100) NOT NULL,
@@ -197,16 +238,16 @@ CREATE TABLE vendedores(
     segundo_nombre varchar(100),
     primer_apellido varchar(100) NOT NULL,
     segundo_apellido varchar(100),
-    fecha_nacimiento date NOT NULL
+    fecha_contratacion date check(fecha_contratacion <= CURRENT_DATE) NOT NULL,  
+    fecha_nacimiento date NOT NULL,
         CHECK ((extract(YEAR from current_date) - extract(YEAR from fecha_nacimiento)) >= 18),
     telefono varchar(20) UNIQUE NOT NULL,
     estado boolean NOT NULL
 );
 
+
 CREATE TABLE comprobantes_fiscales(
     id_comprobante_fiscal integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    cai varchar(37) UNIQUE NOT NULL -- Un cai esta formado por grupos de 6 digitos separados, haciendo un total de 32
-        CHECK(length(cai) = 37), -- La longitud de 37 incluye los 32 digitos mas 5 guiones de separacion
     correlativo_minimo varchar(19) UNIQUE NOT NULL -- Inicio del rango de numeros factura disponibles para la empresa
         CHECK(length(correlativo_minimo) = 19),
     correlativo_maximo varchar(19) UNIQUE NOT NULL -- Fin del rango de numeros de factura
@@ -214,13 +255,15 @@ CREATE TABLE comprobantes_fiscales(
     fecha_limite date NOT NULL
 );
 
+
 CREATE TABLE facturas(
     id_factura integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_comprobante_fiscal integer REFERENCES comprobantes_fiscales(id_comprobante_fiscal) ON DELETE RESTRICT,
+    cai varchar(37) UNIQUE NOT NULL -- Un cai esta formado por grupos de 6 digitos separados, haciendo un total de 32
+        CHECK(length(cai) = 37), -- La longitud de 37 incluye los 32 digitos mas 5 guiones de separacion
     id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
     id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
     id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
-    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE SET NULL,
     numero_factura varchar(50) UNIQUE NOT NULL,
     fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
     importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
@@ -231,6 +274,21 @@ CREATE TABLE facturas(
     isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
     monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
     total decimal(19, 4) NOT NULL -- Total final a pagar
+);
+
+CREATE TABLE pagos(
+    id_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
+    numero_pago integer UNIQUE NOT NULL,
+    fecha_emision date DEFAULT (current_date),
+    importe_exonerado decimal(19, 4) NOT NULL,
+    importe_exento decimal(19, 4) NOT NULL, 
+    importe_gravado decimal(19, 4) NOT NULL,
+    descuentos decimal(19,4) NOT NULL,
+    subtotal decimal(19, 4) NOT NULL, 
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL, 
+    total decimal(19, 4) NOT NULL 
 );
 
 CREATE TABLE detalles_factura(
@@ -262,6 +320,26 @@ CREATE TABLE pedidos(
     entrega_domicilio integer NOT NULL
 );
 
+
+CREATE TABLE detalles_pagos(
+    id_detalles_pagos integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE RESTRICT,
+    id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
+    id_vendedor integer REFERENCES vendedores(id_vendedor) ON DELETE RESTRICT,
+    id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
+    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE SET NULL,
+    numero_factura varchar(50) UNIQUE NOT NULL,
+    fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
+    importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
+    importe_exento decimal(19, 4) NOT NULL, -- Monto donde no se aplica impuestos debido al tipo de servicio
+    importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
+    descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
+    subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
+    total decimal(19, 4) NOT NULL -- Total final a pagar
+);
+
 CREATE TABLE envios(
     id_envio integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE,
@@ -280,7 +358,9 @@ VALUES('admin_08', 'secretpassword',DEFAULT, '/img/usuarios', TRUE);
 INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrador)
 VALUES('oscar1', '12345',DEFAULT, '/img/usuarios', DEFAULT);
 
--- PERSONAS
+INSERT INTO usuarios (nombre, contrasena, fecha_creacion, url_foto, administrador) VALUES
+('maria_j', 'abc12345', DEFAULT, '/img/usuarios', DEFAULT),
+('carlos_g', 'pass789', DEFAULT, '/img/usuarios', DEFAULT);
 
 -- CLIENTES
 INSERT INTO clientes(dni, rtn, primer_nombre, segundo_nombre,
@@ -289,9 +369,19 @@ VALUES ('0801200011111', '99999999999999', 'Oscar', 'Miguel',
     'Velasquez', 'Mendoza', '19990201', '33339999',
     'oscar@gmail.com', NULL, TRUE);
 
+INSERT INTO clientes(dni, rtn, primer_nombre, segundo_nombre, primer_apellido,
+ segundo_apellido, fecha_nacimiento, telefono, correo, razon_social, estado) 
+ VALUES ('0801265454798', '78934651230147', 'Maria', 'Jose', 'Lagos', NULL,
+  '1998-03-14', '84264208', 'Maria123@yahoo.com', 'Soluciones Tecnológicas CG', TRUE),
+('0801199512345', NULL, 'Carlos', 'Alberto', 'Gómez', 'Paz', '1995-05-12', '98887766'
+, 'carlos.gomez@gmail.com', NULL, TRUE);
+
 -- USUARIOS_CLIENTES
 INSERT INTO usuarios_clientes(id_usuario, id_cliente, ultimo_acceso)
 VALUES (2, 1, '20261114');
+INSERT INTO usuarios_clientes(id_usuario, id_cliente, ultimo_acceso) VALUES
+(3, 2, '2026-11-15 14:20:00');
+
 
 -- PAISES
 INSERT INTO paises(nombre)
@@ -300,13 +390,27 @@ VALUES ('Honduras');
 INSERT INTO paises(nombre)
 VALUES ('Estados Unidos');
 
+INSERT INTO paises(nombre) 
+VALUES  ('México'),
+        ('Colombia'),
+        ('Venezuela');
+
 -- DEPARTAMENTOS
 INSERT INTO departamentos(id_pais, nombre)
 VALUES (1, 'Francisco Morazan');
 
+INSERT INTO departamentos(id_pais, nombre) 
+VALUES (1, 'Cortes'),
+       (3, 'Jalisco'),
+       (2, 'Chicago');
+
 -- CIUDADES
 INSERT INTO ciudades(id_departamento, nombre, codigo_postal)
 VALUES (1, 'Distrito Central', '11101');
+
+INSERT INTO ciudades(id_departamento, nombre, codigo_postal) VALUES 
+(2, 'San Pedro Sula', '21101'),
+(3, 'Guadalajara', '44100');
 
 -- DIRECCIONES
 INSERT INTO direcciones(id_ciudad, calle, referencias)
@@ -318,17 +422,32 @@ VALUES (1, 'Residencias Las Uvas', 'Casa numero 9999');
 INSERT INTO direcciones(id_ciudad, calle, referencias)
 VALUES (1, 'Anillo periferico', 'Atras de la gasolinera DOS');
 
+INSERT INTO direcciones(id_ciudad, calle, referencias)
+VALUES (2, 'Avenida Circunvalacion', 'Frente a plaza cenit');
+
 -- DIRECCIONES_CLIENTES
 INSERT INTO direcciones_clientes(id_direccion, id_cliente, predeterminada)
 VALUES (2, 1, TRUE);
+
+INSERT INTO direcciones_clientes(id_direccion, id_cliente, predeterminada) 
+VALUES (4, 2, TRUE);
 
 -- CATEGORIAS
 INSERT INTO categorias(nombre, descripcion)
 VALUES ('Laptops', 'Computadoras portatiles de una variedad de gamas');
 
+INSERT INTO categorias(nombre, descripcion)
+VALUES  ('Laptops', 'Computadoras portatiles de una variedad de gamas'),
+        ('Monitores', 'Pantallas de alta tasa de refresco para oficina y gaming'),
+        ('Almacenamiento', 'Discos de estado sólido y unidades externas');
+
 -- MARCAS
 INSERT INTO marcas(id_pais, nombre)
 VALUES (2, 'Dell');
+
+INSERT INTO marcas(id_pais, nombre) 
+VALUES  (1, 'HP'),
+        (2, 'Kingston');
 
 -- PRODUCTOS
 INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
@@ -337,6 +456,15 @@ INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
 VALUES (1, 1, 'LAP00000', 'ABCD0000EFG','Latitude 5420',
     8999.00, 0.00,9500.00, 10, '20261116',
     '/img/productos', TRUE);
+
+INSERT INTO productos(id_categoria, id_marca, codigo_sku, numero_lote, modelo,
+            precio_costo, precio_descuento, precio_venta, stock, fecha_ingreso, url_img, estado) 
+VALUES   (1, 1, 'LAP00001', 'ABCD0000EFH', 'Latitude 5420', 8999.00, 0.00, 9500.00, 10,
+        '2026-11-16', '/img/productos', TRUE),
+        (2, 2, 'MON00001', 'LOTEHP0199', 'Monitor 24 pulg FHD', 3500.00, 0.00, 4200.00, 15,
+         '2026-11-16', '/img/productos', TRUE),
+        (3, 3, 'SSD00002', 'LOTESSD888', 'SSD NVMe 1TB', 1200.00, 0.00, 1500.00, 25,
+        '2026-11-16', '/img/productos', TRUE);
 
 -- ESPECIFICACIONES
 -- Cada especificacion es una entrada en la tabla, distinta para cada producto
@@ -352,12 +480,17 @@ VALUES (1, 'Color: Negro'),
     (1, 'Tamano pantalla: 14"'),
     (1, 'Resolucion pantalla: 1920x1080p'),
     (1, 'Bateria: 4 celdas 63WHr'),
-    (1, 'Sistema operativo: Windows 11 Pro');
+    (1, 'Sistema operativo: Windows 11 Pro'),
+    (2, 'Resolucion: 1920x1080'),
+    (2, 'Tasa de refresco: 75Hz'),
+    (2, 'Puertos: HDMI y VGA');
 
 -- PROVEEDORES
 INSERT INTO proveedores(id_direccion, rtn, nombre, telefono, correo, estado)
-VALUES (3, '11111111111111', 'Informatica Mayoreo', '22227777',
-    'informatica@gmail.com', TRUE);
+VALUES  (3, '11111111111111', 'Informatica Mayoreo', '22227777',
+        'informatica@gmail.com', TRUE),
+        (4, '12345678901234', 'Tecnologia Avanzada S.A.', '22334455',
+         'ventas@tecnoavanzada.hn', TRUE);
 
 -- COMPRAS
 INSERT INTO compras(id_proveedor, numero_compra, subtotal, monto_isv, total)
@@ -371,17 +504,35 @@ VALUES (1, 1, 2, 8999.00, 17998.00);
 INSERT INTO metodos_pago(nombre, descripcion, condicion_pago)
 VALUES ('VISA', 'Pago con tarjeta', DEFAULT);
 
+INSERT INTO metodos_pago(nombre, descripcion, condicion_pago) 
+VALUES  ('Efectivo', 'Pago en caja', 'Contado'),
+        ('Transferencia Bancaria', 'Depósito directo a cuenta', 'Contado');
+
 --SUCURSALES
 INSERT INTO sucursales(id_direccion, rtn, correo, hora_apertura, hora_cierre,
     telefono, fecha_inauguracion, estado)
 VALUES (1, '08012026111111','info@overclock.hn','08:00', '16:00',
     '33558899', '20261001', TRUE);
 
+INSERT INTO sucursales(id_direccion, rtn, correo, hora_apertura, hora_cierre,
+    telefono, fecha_inauguracion, estado)
+VALUES  (2, '08654564564654', 'info@overclock.hn', '08:30', '16:30',
+    '32128899', '2024-02-19', FALSE),
+        (3, '08019999888877', 'sur@overclock.hn', '09:00', '17:00',
+    '23331122', '2024-05-10', TRUE);
+
 -- REPARTIDORES
 INSERT INTO repartidores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
-    fecha_nacimiento, telefono, estado)
+     fecha_nacimiento, telefono, estado)
 VALUES ('0505199200000', 'Rodrigo', 'Sebastian', 'Molina',
     'Perdomo', '19920202', '99554433', TRUE);
+
+INSERT INTO repartidores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+     fecha_nacimiento, telefono, estado) 
+VALUES ('0801199512347', 'Carlos', 'Eduardo', 'Flores', 'Mejía',
+ '1995-03-12', '91112233', TRUE),
+('0501199198764', 'Mario', 'Alberto', 'Reyes', 'Zelaya', '1991-08-22', '92223344', TRUE),
+('0801199344557', 'Héctor', 'Josué', 'Villeda', 'Navarro', '1993-12-05', '94445566', FALSE);
 
 -- VENDEDORES
 INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
@@ -389,10 +540,21 @@ INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segu
 VALUES ('0804198000000', 'Jose', 'Antonio', 'Ramirez',
     'Ferrari', '19800101', '96695445', TRUE);
 
+INSERT INTO vendedores(dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+ fecha_nacimiento, telefono, estado) 
+ VALUES ('0801198901234', 'Sofía', 'Alejandra', 'Martínez', 'Ríos', '19890415', '95556677', TRUE),
+        ('0501199256789', 'Ricardo', 'David', 'Guevara', 'Ponce', '19920920', '96667788', TRUE),
+        ('0801199433221', 'Gabriela', 'Nicole', 'Hernández', 'Díaz', '19941103', '97778899', FALSE);
+
 -- COMPROBANTES_FISCALES
 INSERT INTO comprobantes_fiscales(cai, correlativo_minimo, correlativo_maximo, fecha_limite)
-VALUES ('ABCD01-EFGH02-IJKL03-MNOP04-QRST05-06', '000-001-01-00000001',
+VALUES ('ABCD01-EFGH02-IJKL03-MNOP04-QRST05-06', '000-001-01-00000000',
     '000-001-01-00000050', '20271212');
+
+INSERT INTO comprobantes_fiscales(cai, correlativo_minimo, correlativo_maximo, fecha_limite) 
+VALUES  ('123456-7890AB-CDEF12-345678-90ABCD-EF', '000-001-01-00000001', '000-001-01-00000100', '20281231'),
+        ('ABCDEF-123456-7890AB-CDEF12-345678-01', '000-002-01-00000001', '000-002-01-00000050', '20280630'),
+        ('987654-3210ZY-XWVU98-765432-10ZYXW-99', '000-003-01-00000001', '000-003-01-00000200', '20290315');
 
 -- FACTURAS
 INSERT INTO facturas(id_comprobante_fiscal, id_sucursal, id_vendedor, id_cliente, id_metodo_pago,
@@ -402,21 +564,45 @@ VALUES (1, 1, 1, 1, 1,
     '000-001-01-00000002', 0.00, 0.00, 19000.00,
     0.00, 19000.00,2850.00, 21850.00);
 
+INSERT INTO facturas(id_comprobante_fiscal, id_sucursal, id_vendedor, id_cliente, id_metodo_pago,
+    numero_factura, importe_exonerado, importe_exento, importe_gravado,
+     descuentos, subtotal, monto_isv, total) VALUES 
+(1, 1, 2, 2, 1, '000-001-01-00000003', 0.00, 0.00, 8500.00, 0.00, 8500.00, 1275.00, 9775.00),
+(2, 2, 3, 3, 2, '000-002-01-00000002', 0.00, 0.00, 12000.00, 200.00, 11800.00, 1770.00, 13570.00),
+(3, 1, 1, 1, 3, '000-003-01-00000003', 0.00, 0.00, 5400.00, 0.00, 5400.00, 810.00, 6210.00);
+
 -- DETALLES_FACTURA
 INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
 VALUES (1, 1, 9500.00, 2, 0.00, 0.00, 19000.00);
+
+INSERT INTO detalles_factura(id_factura, id_producto, precio_venta, cantidad, descuento, monto_descuento, subtotal)
+VALUES (3, 4, 4500.00, 5, 0.00, 0.00, 9000.00);
+
 
 -- GARANTIAS
 INSERT INTO garantias(id_cliente, id_producto, fecha_vencimiento)
 VALUES (1, 1, '20271114');
 
+INSERT INTO garantias(id_cliente, id_producto, fecha_vencimiento) 
+VALUES  (2, 2, '20280515'),
+        (3, 3, '20280820');
+
 -- PEDIDOS
 INSERT INTO pedidos(id_factura, fecha_finalizacion, entrega_domicilio)
 VALUES (1,  '20271114 17:00', 1);
 
+INSERT INTO pedidos(id_factura, fecha_finalizacion, entrega_domicilio) 
+VALUES  (2, '20261116 14:00', 1),
+        (3, '20261117 16:30', 0);
+
 -- ENVIOS
 INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones)
 VALUES (1, 1, 2, 'ENV0000000000000', 'Paquete fragil');
+
+INSERT INTO envios(id_pedido, id_repartidor, id_direccion, numero_guia, observaciones) 
+VALUES  (2, 2, 4, 'ENV0000000000003', 'Dejar en la puerta principal y tocar timbre'),
+        (3, 3, 2, 'ENV0000000000004', 'Entrega en oficina corporativa, preguntar por recepción'),
+        (1, 1, 2, 'ENV0000000000005', 'Paquete fragil');
 
 -- CONSULTAS DE EJEMPLO
 -- JOINS
@@ -455,30 +641,36 @@ INNER JOIN productos AS P ON P.id_producto = DF.id_producto;
 
 SELECT * FROM vw_factura_completa;
 
-/* CREATE TABLE numeros_serie(
-    id_numero_serie integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_producto integer REFERENCES productos(id_producto),
-    -- Numero de serie unico para cada existencia de un producto
-    numero_serie varchar(20) UNIQUE NOT NULL,
-    fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
-    -- Se marca como 0 cuando el producto se ha vendido, indicando que el numero de serie fue utilizado
-    disponible integer DEFAULT(1) NOT NULL
-); */
+-- PRODUCTOS MAS VENDIDOS POR CADA CATEGORIA
+WITH Resumen_Ventas_Productos AS (
+    
+SELECT   P.id_producto,P.modelo AS Producto ,C.id_categoria,
+         C.nombre AS Categoria , SUM(DF.cantidad) AS Cantidades_Vendidas,
+         SUM(F.total) AS Ganancias_Totales  FROM productos P
+INNER JOIN categorias C ON P.id_categoria = C.id_categoria
+INNER JOIN detalles_factura DF ON P.id_producto = DF.id_producto
+INNER JOIN facturas as F ON F.id_factura = DF.id_factura
+GROUP BY P.id_producto,P.modelo , C.id_categoria, C.nombre
+)
 
-/* CREATE TABLE carritos(
-    id_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_usuario integer REFERENCES usuarios(id_usuario),
-    subtotal decimal(19, 4) NOT NULL,
-    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL,
-    total decimal(19, 4) NOT NULL
-);
+-- MOSTRAR LOS PRODUCTOS MAS VENDIDOS 
+SELECT * FROM Resumen_Ventas_Productos
+ORDER BY Cantidades_Vendidas DESC;
 
-CREATE TABLE detalles_carritos(
-    id_detalle_carrito integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_carrito integer REFERENCES carritos(id_carrito),
-    id_producto integer REFERENCES productos(id_producto),
-    cantidad integer NOT NULL,
-    precio_venta decimal(19, 4) NOT NULL,
-    subtotal decimal(19, 4) NOT NULL
-); */
+WITH Productos_Agotados AS (
+   -- Todos los productos agotados pero activos
+    SELECT 
+        P.id_producto,
+        P.codigo_sku,
+        M.nombre AS marca,
+        C.nombre AS categoria,
+        P.modelo AS producto,
+        P.precio_venta,
+        P.stock
+    FROM productos P
+    INNER JOIN marcas M ON P.id_marca = M.id_marca
+    INNER JOIN categorias C ON P.id_categoria = C.id_categoria
+    WHERE P.stock = 0 AND P.estado = TRUE
+)
+SELECT * FROM Productos_Agotados 
+ORDER BY categoria ASC, producto ASC;
