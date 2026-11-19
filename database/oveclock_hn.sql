@@ -37,6 +37,7 @@ CREATE TABLE clientes(
     telefono varchar(20) UNIQUE NOT NULL,
     correo varchar(100) UNIQUE NOT NULL
         CHECK (correo ~~ '%@%'),
+    tarjeta_credito varchar(20) UNIQUE NULL,
     fecha_registro timestamp DEFAULT(current_timestamp) NOT NULL,
     razon_social varchar(50),
     estado boolean NOT NULL
@@ -122,7 +123,7 @@ CREATE TABLE promociones(
 
     id_promocion integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_tipo_promocion integer REFERENCES tipo_promocion(id_tipo_promocion) ON DELETE RESTRICT,
-    id_producto integer REFERENCES productos(id_producto) ON DELETE CASCADE,
+    id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
     fecha_inicio date NOT NULL,
     fecha_vencimiento date NOT NULL,
     porcentaje_descuento decimal(3,2) NOT NULL,
@@ -172,7 +173,17 @@ CREATE TABLE metodos_pago(
     id_metodo_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre varchar(100) NOT NULL,
     descripcion varchar(500),
-    condicion_pago varchar(20) NOT NULL
+    condicion_pago varchar(20) NOT NULL,
+    efectivo boolean NOT NULL
+);
+
+CREATE TABLE detalles_tarjeta(
+    id_detalle_tarjeta integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
+    numero_tarjeta varchar(20) UNIQUE NOT NULL,
+    fecha_vencimiento date NOT NULL,
+    tipo_tarjeta varchar(20) DEFAULT 'Credito' 
+    check(nombre_tipo = 'Credito' or nombre_tipo = 'Debito')
 );
 
 CREATE TABLE sucursales(
@@ -266,10 +277,17 @@ CREATE TABLE facturas(
 
 CREATE TABLE pagos(
     id_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
     id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
-    total decimal(19,4) check(total > 0) NOT NULL,
-    estado varchar(20) NOT NULL
+    numero_pago integer UNIQUE NOT NULL,
+    fecha_emision date DEFAULT (current_date),
+    importe_exonerado decimal(19, 4) NOT NULL,
+    importe_exento decimal(19, 4) NOT NULL, 
+    importe_gravado decimal(19, 4) NOT NULL,
+    descuentos decimal(19,4) NOT NULL,
+    subtotal decimal(19, 4) NOT NULL, 
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
+    monto_isv decimal(19, 4) NOT NULL, 
+    total decimal(19, 4) NOT NULL 
 );
 
 CREATE TABLE detalles_factura(
@@ -302,7 +320,7 @@ CREATE TABLE pedidos(
 );
 
 
-CREATE TABLE detalles_pedido(
+CREATE TABLE detalles_pagos(
     id_detalles_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE RESTRICT,
     id_sucursal integer REFERENCES sucursales(id_sucursal) ON DELETE RESTRICT,
@@ -319,14 +337,6 @@ CREATE TABLE detalles_pedido(
     isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
     monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
     total decimal(19, 4) NOT NULL -- Total final a pagar
-);
-
-CREATE TABLE detalles_pagos(
-    id_detalles_pago integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_metodo_pago integer REFERENCES metodos_pago(id_metodo_pago) ON DELETE RESTRICT,
-    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE, 
-    monto_total decimal(19,4) check(monto_total > 0) NOT NULL
-    fecha_pago date DEFAULT current_date
 );
 
 CREATE TABLE envios(
