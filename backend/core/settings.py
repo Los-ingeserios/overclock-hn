@@ -46,11 +46,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Aplicacion para reconocer los tipos de datos de PostgreSQL
+    'django.contrib.postgres',
     # Third-party libraries
     'rest_framework',
     'corsheaders',
     # Custom Apps for the project
     'apps.usuarios',
+    'apps.compras',
+    'apps.direcciones',
+    'apps.facturacion',
+    'apps.gestion_empresarial',
+    'apps.inventario',
+    'apps.pagos',
+    'apps.pedidos',    
 ]
 
 MIDDLEWARE = [
