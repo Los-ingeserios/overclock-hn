@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+	/* Main source */
+	--font-sans: "Poppins", sans-serif;
+
+	/* Color palette */
+	--color-brand-bg: #242430;
+	--color-brand-surface: #383838;
+	--color-brand-white: #feffff;
+	--color-brand-primary: #7270ec;
+	--color-brand-primary-hover: #6c69f9;
+	--color-brand-gray: #747474;
+	--color-brand-muted: #747b8f;
+	--color-brand-glass: #4e4b5076;
+	--color-brand-divider: #7a7b8f16;
+}
+
+/* Global Swiper styles */
+.swiper-button-prev,
+.swiper-button-next {
+	color: var(--color-brand-white) !important;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+	font-size: 25px !important;
+}
+
+.swiper-pagination-bullet {
+	background-color: var(--color-brand-gray) !important;
+	opacity: 1 !important;
+}
+
+.swiper-pagination-bullet-active {
+	background-color: var(--color-brand-primary) !important;
+}
