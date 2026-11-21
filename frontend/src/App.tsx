@@ -3,6 +3,11 @@ import "./index.css";
 import ClientLayout from "./components/ClientLayout";
 import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import LoginPage from "./pages/LoginPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { GuestRoute } from "./components/auth/GuestRoute";
+import { RegisterPage } from "./pages/RegisterPage";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 function PlaceholderPage({ title }: { title: string }) {
 	return (
@@ -18,10 +23,25 @@ function App() {
 		<BrowserRouter>
 			<Routes>
 				<Route element={<ClientLayout />}>
+					{/* Public routes */}
 					<Route path="/" element={<HomePage />} />
 					<Route path="/catalogo" element={<PlaceholderPage title="Catalogo de Hardware" />} />
 					<Route path="/carrito" element={<PlaceholderPage title="Carritos de Compras" />} />
-					<Route path="/login" element={<PlaceholderPage title="Iniciar Sesion" />} />
+					<Route path="/verificar-cuenta" element={<VerifyEmailPage />} />
+					{/* Visitors not logged in only */}
+					<Route element={<GuestRoute />}>
+						<Route path="/login" element={<LoginPage />} />
+						<Route path="/registro" element={<RegisterPage />} />
+					</Route>
+					{/* Protected routes (require a session) */}
+					<Route element={<ProtectedRoute />}>
+						<Route path="/mi-cuenta" element={<PlaceholderPage title="Mi Cuenta e Historial" />} />
+					</Route>
+					{/* Administrator-only routes */}
+					<Route element={<ProtectedRoute requireAdmin />}>
+						<Route path="/admin" element={<PlaceholderPage title="Panel Administrativo" />} />
+					</Route>
+					{/* 404 Error */}
 					<Route path="*" element={<NotFoundPage />} />
 				</Route>
 			</Routes>
