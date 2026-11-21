@@ -1,7 +1,12 @@
 from rest_framework import serializers
-from apps.direcciones.models import Paises
+from apps.direcciones.models import Pais, Departamento
 
-class PaisesSerializer(serializers.ModelSerializer):
+class PaisSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Paises
-        fields = ["id_pais", "nombre"]
+        model = Pais
+        fields = ["id_pais", "nombre", "estado"]
+
+class DepartamentoSerializer(serializers.ModelSerializer):
+    class Meta:
+        models = Departamento
+        fields = ["id_departamento", "id_pais", "nombre", "estado"]
