@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from apps.inventario.urls import inventario_router
+from apps.direcciones.urls import direcciones_router
 
 urlpatterns = [
-    path('api/v1/admin/', admin.site.urls),
-    path('api/v1', include(inventario_router.urls))
+    path('admin/', admin.site.urls),
+    path('api/v1/', include(inventario_router.urls)),
+    path('api/v1/', include(direcciones_router.urls))
 ]
