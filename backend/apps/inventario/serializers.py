@@ -1,39 +1,60 @@
 from rest_framework import serializers
-from apps.inventario.models import Categoria, Marca, Producto, Especificacion, TipoPromocion, Promocion, PromocionProducto
+
+from apps.inventario.models import (
+    Categoria, Marca, Producto, Especificacion, TipoPromocion,
+    Promocion, PromocionProducto
+)
 
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
-        fields = ["id_categoria", "nombre", "descripcion"]
+        fields = "__all__"
 
 class MarcaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Marca
-        fields = ["id_pais", "id_marca", "nombre"]
+        fields = "__all__"
 
-class ProductoSerializer(serializers.ModelSerializer):
+class ProductoAllSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
-        fields = ["id_producto", "id_categoria", "id_marca", "codigo_sku", "numero_lote",
-            "modelo", "precio_costo", "precio_venta", "stock", "fecha_ingreso", "url_img", "estado"]
+        fields = "__all__"
+
+# Esta clase esta pensada para mostrar los datos de los producto a los clientes
+class ProductoListSerializer(serializers.ModelSerializer):
+    id_categoria = CategoriaSerializer(many=False, read_only=True)
+    id_marca = MarcaSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Producto
+        fields = ["id_producto", "codigo_sku", "id_categoria", "id_marca", "modelo", 
+                  "precio_venta", "stock", "url_img"]
 
 class EspecificacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Especificacion
-        fields = ["id_especificacion", "id_producto", "especificacion"]
+        fields = "__all__"
+        
+class ProductoDetailSerializer(serializers.ModelSerializer):
+    id_categoria = serializers.SlugRelatedField(many=False, read_only=True, slug_field='descripcion')
+    especificaciones = EspecificacionSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Producto
+        fields = ["id_producto", "modelo", "id_categoria", "precio_venta", "stock", 
+                  "especificaciones"]
 
 class TipoPromocionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoPromocion
-        fields = ["id_tipo_promocion", "nombre", "descripcion"]
+        fields = "__all__"
 
 class PromocionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promocion
-        fields = ["id_promocion", "id_tipo_promocion", "fecha_inicio", "fecha_vencimiento", "porcentaje_descuento",
-                  "cantidad_requerida", "cantidad_beneficio", "estado"]
+        fields = "__all__"
 
 class PromocionProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = PromocionProducto
-        fields = ["id_promocion_producto", "id_promocion", "id_producto", "rol_producto"]
+        fields = "__all__"

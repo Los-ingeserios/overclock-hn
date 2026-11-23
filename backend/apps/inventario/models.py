@@ -24,8 +24,8 @@ class Marca(models.Model):
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
-    id_categoria = models.ForeignKey(Categoria, db_column='id_categoria', blank=True, null=True, on_delete=models.RESTRICT)
-    id_marca = models.ForeignKey(Marca, db_column='id_marca', blank=True, null=True, on_delete=models.RESTRICT)
+    id_categoria = models.ForeignKey(Categoria, related_name='productos', db_column='id_categoria', blank=True, null=True, on_delete=models.RESTRICT)
+    id_marca = models.ForeignKey(Marca, related_name='productos', db_column='id_marca', blank=True, null=True, on_delete=models.RESTRICT)
     codigo_sku = models.CharField(unique=True, max_length=8)
     numero_lote = models.CharField(unique=True, max_length=20)
     modelo = models.CharField(max_length=100)
@@ -43,7 +43,7 @@ class Producto(models.Model):
 
 class Especificacion(models.Model):
     id_especificacion = models.AutoField(primary_key=True)
-    id_producto = models.ForeignKey(Producto, db_column='id_producto', blank=True, null=True, on_delete=models.CASCADE)
+    id_producto = models.ForeignKey(Producto, related_name='especificaciones', db_column='id_producto', blank=True, null=True, on_delete=models.CASCADE)
     especificacion = models.CharField(max_length=100)
 
     class Meta:

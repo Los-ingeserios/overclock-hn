@@ -150,3 +150,16 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Configuraciones respectiva a la API REST
+REST_FRAMEWORK = {
+    # Configuracion dedicada a la paginacion en las respuestas
+    # Se aplica a todos los objetos
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+
+    # Configuracion de versionamiento
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'DEFAULT_VERSION': 'v1',
+    'ALLOWED_VERSIONS': ['v1', 'v2', 'v3']
+}

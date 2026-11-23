@@ -2,6 +2,9 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from apps.direcciones.views import PaisViewSet, DepartamentoViewSet, CiudadViewSet, DireccionViewSet
 
+# Nombre de la app por medio de app_name
+app_name = 'direcciones'
+
 direcciones_router = DefaultRouter()
 direcciones_router.register(r'paises', PaisViewSet)
 direcciones_router.register(r'departamentos', DepartamentoViewSet)
