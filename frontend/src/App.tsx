@@ -8,6 +8,7 @@ import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { GuestRoute } from "./components/auth/GuestRoute";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { CatalogPage } from "./pages/CatalogPage";
 
 function PlaceholderPage({ title }: { title: string }) {
 	return (
@@ -25,7 +26,7 @@ function App() {
 				<Route element={<ClientLayout />}>
 					{/* Public routes */}
 					<Route path="/" element={<HomePage />} />
-					<Route path="/catalogo" element={<PlaceholderPage title="Catalogo de Hardware" />} />
+					<Route path="/catalogo" element={<CatalogPage />} />
 					<Route path="/carrito" element={<PlaceholderPage title="Carritos de Compras" />} />
 					<Route path="/verificar-cuenta" element={<VerifyEmailPage />} />
 					{/* Visitors not logged in only */}
