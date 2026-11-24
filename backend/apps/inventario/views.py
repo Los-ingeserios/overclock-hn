@@ -28,7 +28,7 @@ class MarcaViewSet(viewsets.ModelViewSet):
 
 # Vista principal de producto
 class ProductoViewSet(ListRetrieveCreateViewSet):
-    queryset = Producto.objects.select_related("id_categoria", "id_marca").prefetch_related("especificaciones").order_by("modelo", "id_producto")
+    queryset = Producto.objects.select_related("id_categoria", "id_marca").prefetch_related("especificaciones").order_by("codigo_sku", "id_producto")
 
     # Sobreescritura del metodo get_serializer_class() para determinar distintos serializer
     def get_serializer_class(self):

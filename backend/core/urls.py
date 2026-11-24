@@ -18,8 +18,19 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 
+# Se importan los routers individuales de cada aplicacion
+from apps.inventario.urls import inventario_router
+from apps.direcciones.urls import direcciones_router
+
+# Se crea un router unico para cada version de la api, al cual se agregan los routers de las aplicaciones
+api_v1_router = DefaultRouter()
+api_v1_router.registry.extend(inventario_router.registry)
+api_v1_router.registry.extend(direcciones_router.registry)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/inventario/', include('apps.inventario.urls', namespace='v1')),
-    path('api/v1/direcciones/', include('apps.direcciones.urls', namespace='v1')),
+    
+    # Se incluye unicamente las urls del router de la api
+    # El atributo namespace debe ser unico, y cada nuevo registro debe corresponder a una nueva version 'v2', 'v3'...
+    re_path(r'^api/v1/', include((api_v1_router.urls, 'api_v1'), namespace='v1')),
 ]
