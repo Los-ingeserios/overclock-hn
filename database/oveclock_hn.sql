@@ -14,7 +14,7 @@ CREATE TABLE usuarios(
     nombre varchar(20) UNIQUE NOT NULL,
     contrasena varchar(100) NOT NULL,
     fecha_creacion timestamp DEFAULT(current_timestamp) NOT NULL,
-    url_foto varchar(50) NULL,
+    url_foto varchar(255) NULL,
     -- Valor para determinar los permisos del usuario
     administrador boolean DEFAULT(FALSE) NOT NULL
 );
