@@ -10,13 +10,6 @@ from apps.inventario.serializers import (
     ProductoDetailSerializer, TipoPromocionSerializer, PromocionSerializer, PromocionProductoSerializer
 )
 
-# Vista de soporte para incluir solamente los metodos list, retrieve, create
-class ListRetrieveCreateViewSet(mixins.ListModelMixin,
-                                mixins.RetrieveModelMixin,
-                                mixins.CreateModelMixin, 
-                                viewsets.GenericViewSet):
-    pass
-
 # La clase ModelViewSet provee todos los metodos para un CRUD
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.order_by("nombre", "id_categoria").all()
@@ -27,7 +20,7 @@ class MarcaViewSet(viewsets.ModelViewSet):
     serializer_class = MarcaSerializer
 
 # Vista principal de producto
-class ProductoViewSet(ListRetrieveCreateViewSet):
+class ProductoViewSet(viewsets.ModelViewSet):
     queryset = Producto.objects.select_related("id_categoria", "id_marca").prefetch_related("especificaciones").order_by("codigo_sku", "id_producto")
 
     # Sobreescritura del metodo get_serializer_class() para determinar distintos serializer
@@ -35,12 +28,10 @@ class ProductoViewSet(ListRetrieveCreateViewSet):
         if hasattr(self, 'action'):
             if self.action == "list": # Pensado para la vista del cliente para ver todos los productos
                 return ProductoListSerializer
-            elif self.action == "retrieve": # Utilizado cuando se busca un producto por su id
+            if self.action == "retrieve": # Utilizado cuando se busca un producto por su id
                 return ProductoDetailSerializer
-            else:
-                return ProductoAllSerializer
                 
-        return ProductoAllSerializer # Se retorna en el caso de que se utilice otro metodo
+        return ProductoAllSerializer # Se retorna todo el modelo en el caso de que se utilice otro metodo
 
 class EspecificacionViewSet(viewsets.ModelViewSet):
     queryset = Especificacion.objects.select_related("id_producto").all().order_by("especificacion", "id_especificacion")
