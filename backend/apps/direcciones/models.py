@@ -10,6 +10,9 @@ class Pais(models.Model):
     class Meta:
         managed = False
         db_table = 'paises'
+    
+    def __str__(self):
+        return self.nombre
 
 class Departamento(models.Model):
     id_departamento = models.AutoField(primary_key=True)
@@ -20,6 +23,10 @@ class Departamento(models.Model):
     class Meta:
         managed = False
         db_table = 'departamentos'
+
+    def __str__(self):
+        return self.nombre
+
 
 class Ciudad(models.Model):
     id_ciudad = models.AutoField(primary_key=True)
@@ -33,6 +40,9 @@ class Ciudad(models.Model):
         managed = False
         db_table = 'ciudades'
 
+    def __str__(self):
+        return self.nombre
+
 class Direccion(models.Model):
     id_direccion = models.AutoField(primary_key=True)
     id_ciudad = models.ForeignKey(Ciudad, db_column='id_ciudad', blank=True, null=True, on_delete=models.RESTRICT)
@@ -42,4 +52,7 @@ class Direccion(models.Model):
     class Meta:
         managed = False
         db_table = 'direcciones'
+
+    def __str__(self):
+        return f"{self.calle}, {self.id_ciudad.nombre}, {self.id_ciudad.id_departamento.nombre}, {self.id_ciudad.id_departamento.id_pais.nombre}"
         

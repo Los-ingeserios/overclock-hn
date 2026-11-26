@@ -30,7 +30,7 @@ api_v1_router.registry.extend(direcciones_router.registry)
 api_v1_router.registry.extend(gestion_empresarial_router.registry)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     
     # Se incluye unicamente las urls del router de la api
     # El atributo namespace debe ser unico, y cada nuevo registro debe corresponder a una nueva version 'v2', 'v3'...

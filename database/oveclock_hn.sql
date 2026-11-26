@@ -104,11 +104,12 @@ CREATE TABLE productos(
     codigo_sku varchar(8) UNIQUE NOT NULL,
     numero_lote varchar(20) UNIQUE NOT NULL,
     modelo varchar(100) NOT NULL,
+    descripcion varchar(200),
     precio_costo decimal(19, 4) NOT NULL,
     precio_venta decimal(19, 4) NOT NULL,
     stock int NOT NULL CHECK(stock >= 0), -- Incorporacion de check para validar que el stock no sea negativo
     fecha_ingreso timestamp DEFAULT(current_timestamp) NOT NULL,
-    url_img varchar(100),
+    url_img varchar(500),
     estado boolean DEFAULT(TRUE) NOT NULL
 );
 

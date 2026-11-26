@@ -32,6 +32,9 @@ class Cliente(models.Model):
     class Meta:
         managed = False
         db_table = 'clientes'
+        
+    def __str__(self):
+        return f"{self.primer_nombre} {self.segundo_nombre or ''} {self.primer_apellido} {self.segundo_apellido or ''}".strip()
 
 class DireccionCliente(models.Model):
     id_direccion_cliente = models.AutoField(primary_key=True)

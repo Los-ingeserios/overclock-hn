@@ -13,6 +13,9 @@ class Categoria(models.Model):
         managed = False
         db_table = 'categorias'
 
+    def __str__(self):
+        return self.nombre
+
 class Marca(models.Model):
     id_marca = models.AutoField(primary_key=True)
     id_pais = models.ForeignKey(Pais, db_column='id_pais', blank=True, null=True, on_delete=models.RESTRICT)
@@ -21,6 +24,9 @@ class Marca(models.Model):
     class Meta:
         managed = False
         db_table = 'marcas'
+
+    def __str__(self):
+        return self.nombre
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
@@ -32,9 +38,10 @@ class Producto(models.Model):
     precio_costo = models.DecimalField(max_digits=19, decimal_places=4)
     precio_venta = models.DecimalField(max_digits=19, decimal_places=4)
     stock = models.IntegerField()
+    descripcion = models.CharField(max_length=200, blank=True, null=True)
     # La funcion Now() es equivalente a current_timestamp en la base de datos
     fecha_ingreso = models.DateTimeField(db_default=Now())
-    url_img = models.CharField(max_length=100, blank=True, null=True)
+    url_img = models.CharField(max_length=500, blank=True, null=True)
     estado = models.BooleanField(db_default=True)
 
     class Meta:
