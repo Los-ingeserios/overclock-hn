@@ -24,6 +24,7 @@ from apps.direcciones.urls import direcciones_router
 from apps.gestion_empresarial.urls import gestion_empresarial_router
 from apps.proveedores.urls import proveedores_router
 from apps.garantias.urls import garantias_router
+from apps.pagos.urls import pagos_router
 
 # Se crea un router unico para cada version de la api, al cual se agregan los routers de las aplicaciones
 api_v1_router = DefaultRouter()
@@ -32,6 +33,7 @@ api_v1_router.registry.extend(direcciones_router.registry)
 api_v1_router.registry.extend(gestion_empresarial_router.registry)
 api_v1_router.registry.extend(proveedores_router.registry)
 api_v1_router.registry.extend(garantias_router.registry)
+api_v1_router.registry.extend(pagos_router.registry)
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
