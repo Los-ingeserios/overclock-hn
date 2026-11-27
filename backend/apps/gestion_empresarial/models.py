@@ -87,15 +87,13 @@ class Sucursal(models.Model):
         Direccion,
         db_column="id_direccion",
         on_delete=models.RESTRICT,
-        blank=True,
-        null=True,
     )
     rtn = models.CharField(
         unique=True,
         max_length=14,
         validators=[MinLengthValidator(14, "El RTN debe tener 14 caracteres")],
     )
-    correo = models.EmailField(max_length=20)
+    correo = models.EmailField(max_length=30)
     hora_apertura = models.TimeField()
     hora_cierre = models.TimeField()
     telefono = models.CharField(max_length=20, unique=True)

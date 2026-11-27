@@ -190,14 +190,15 @@ CREATE TABLE detalles_compras(
 
 CREATE TABLE sucursales(
     id_sucursal integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_direccion integer REFERENCES direcciones(id_direccion) ON DELETE RESTRICT,
+    id_direccion integer REFERENCES direcciones(id_direccion) ON DELETE RESTRICT NOT NULL,
     -- Se refiere al rtn y correo de la empresa que se deben imprimir en las facturas
     rtn varchar(14) UNIQUE NOT NULL
         CHECK(length(rtn) = 14),
-    correo varchar(20) NOT NULL
+    correo varchar(30) NOT NULL
         CHECK(correo ~~ '%@%'),
     hora_apertura time NOT NULL,
-    hora_cierre time NOT NULL,
+    hora_cierre time NOT NULL 
+        CHECK(hora_cierre > hora_apertura),
     telefono varchar(20) UNIQUE NOT NULL,
     fecha_inauguracion date NOT NULL,
     estado boolean DEFAULT(TRUE) NOT NULL
