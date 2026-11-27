@@ -13,7 +13,7 @@ services:
     volumes:
       # Uso de un volumen para los datos en vez de un bind mount
       - pg_data:/var/lib/postgresql
-      - ./database/oveclock_hn.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./database/overclock_hn.sql:/docker-entrypoint-initdb.d/1-schema.sql
 
 volumes:
   pg_data:
