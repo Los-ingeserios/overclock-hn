@@ -265,14 +265,14 @@ CREATE TABLE facturas(
     id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
     numero_factura varchar(50) UNIQUE NOT NULL,
     fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
-    importe_exonerado decimal(19, 4) NOT NULL, -- Monto del que el cliente esta dispensado o libre de no realizar
-    importe_exento decimal(19, 4) NOT NULL, -- Monto donde no se aplica impuestos debido al tipo de servicio
-    importe_gravado decimal(19, 4) NOT NULL, -- Monto que si aplica a impuestos
-    descuentos decimal(19, 4) NOT NULL, -- Suma de los descuentos individuales aplicables en cada producto
-    subtotal decimal(19, 4) NOT NULL, -- Suma de los importes previos
-    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL, -- Porcentaje y calculo de impuestos, si aplica
-    total decimal(19, 4) NOT NULL -- Total final a pagar
+    importe_exonerado decimal(19, 4) NOT NULL CHECK (importe_exonerado >= 0), -- Monto del que el cliente esta dispensado o libre de no realizar
+    importe_exento decimal(19, 4) NOT NULL CHECK (importe_exento >= 0), -- Monto donde no se aplica impuestos debido al tipo de servicio
+    importe_gravado decimal(19, 4) NOT NULL CHECK (importe_gravado >= 0), -- Monto que si aplica a impuestos
+    descuentos decimal(19, 4) NOT NULL CHECK (descuentos >= 0), -- Suma de los descuentos individuales aplicables en cada producto
+    subtotal decimal(19, 4) NOT NULL CHECK (subtotal > 0), -- Suma de los importes previos
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL CHECK (isv >= 0 AND isv <= 1), -- Porcentaje de impuesto aplicado a la factura
+    monto_isv decimal(19, 4) NOT NULL CHECK (monto_isv >= 0), -- Porcentaje y calculo de impuestos, si aplica
+    total decimal(19, 4) NOT NULL CHECK (total > 0) -- Total final a pagar
 );
 
 CREATE TABLE detalles_factura(
@@ -280,12 +280,14 @@ CREATE TABLE detalles_factura(
     id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
     id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
     id_promocion integer REFERENCES promociones(id_promocion) ON DELETE SET NULL,
-    precio_venta decimal(19, 4) NOT NULL,
-    cantidad integer NOT NULL,
-    subtotal decimal(19, 4) NOT NULL,
-    descuento decimal(3,2) NOT NULL, -- Porcentaje del descuento
-    monto_descuento decimal(19, 4) NOT NULL, -- Monto que resulta de dicho descuento
-    subtotal_descuento decimal (19, 4) NOT NULL
+    precio_venta decimal(19, 4) NOT NULL 
+        CHECK(precio_venta > 0),
+    cantidad integer NOT NULL CHECK (cantidad > 0),
+    subtotal decimal(19, 4) NOT NULL 
+        CHECK(subtotal > 0),
+    descuento decimal(3, 2) NOT NULL CHECK (descuento >= 0 AND descuento <= 1), -- Porcentaje del descuento
+    monto_descuento decimal(19, 4) NOT NULL CHECK (monto_descuento >= 0 AND monto_descuento <= subtotal), -- Monto que resulta de dicho descuento
+    subtotal_descuento decimal (19, 4) NOT NULL CHECK (subtotal_descuento >= 0)
 );
 
 CREATE TABLE tarjetas(
