@@ -53,3 +53,58 @@ class DireccionCliente(models.Model):
     class Meta:
         managed = False
         db_table = 'direcciones_clientes'
+
+class Vendedor(models.Model):
+    id_vendedor = models.AutoField(primary_key=True)
+    dni = models.CharField(
+        unique=True,
+        max_length=13,
+        validators=[MinLengthValidator(13, "El DNI debe tener 13 caracteres")],
+    )
+    primer_nombre = models.CharField(max_length=100)
+    segundo_nombre = models.CharField(max_length=100, blank=True, null=True)
+    primer_apellido = models.CharField(max_length=100)
+    segundo_apellido = models.CharField(max_length=100, blank=True, null=True)
+    fecha_contratacion = models.DateField()
+    fecha_nacimiento = models.DateField()
+    telefono = models.CharField(max_length=20, unique=True)
+    estado = models.BooleanField(db_default=True)
+
+    class Meta:
+        managed = False
+        db_table = "vendedores"
+
+    def __str__(self):
+        return (
+            f"{self.primer_nombre} {self.segundo_nombre or ''} "
+            f"{self.primer_apellido} {self.segundo_apellido or ''}"
+        ).strip()
+
+
+class Sucursal(models.Model):
+    id_sucursal = models.AutoField(primary_key=True)
+    id_direccion = models.ForeignKey(
+        Direccion,
+        db_column="id_direccion",
+        on_delete=models.RESTRICT,
+        blank=True,
+        null=True,
+    )
+    rtn = models.CharField(
+        unique=True,
+        max_length=14,
+        validators=[MinLengthValidator(14, "El RTN debe tener 14 caracteres")],
+    )
+    correo = models.EmailField(max_length=20)
+    hora_apertura = models.TimeField()
+    hora_cierre = models.TimeField()
+    telefono = models.CharField(max_length=20, unique=True)
+    fecha_inauguracion = models.DateField()
+    estado = models.BooleanField(db_default=True)
+
+    class Meta:
+        managed = False
+        db_table = "sucursales"
+
+    def __str__(self):
+        return f"Sucursal #{self.id_sucursal} - RTN {self.rtn}"
