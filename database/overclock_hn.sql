@@ -332,17 +332,17 @@ CREATE TABLE detalles_pagos_tarjetas(
 
 CREATE TABLE pedidos(
     id_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
+    id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE NOT NULL,
     fecha_emision timestamp DEFAULT(current_timestamp) NOT NULL,
-    fecha_completacion timestamp,
-    importe_exonerado DECIMAL(19, 4) NOT NULL,
-    importe_exento DECIMAL(19, 4) NOT NULL,
-    importe_gravado DECIMAL(19, 4) NOT NULL,
-    descuentos decimal(19, 4) NOT NULL,
-    subtotal decimal(19, 4) NOT NULL,
-    isv decimal(3, 2) DEFAULT(0.15) NOT NULL,
-    monto_isv decimal(19, 4) NOT NULL,
-    total decimal(19, 4) NOT NULL,
+    fecha_completacion timestamp CHECK (fecha_completacion IS NULL OR fecha_completacion >= fecha_emision),
+    importe_exonerado DECIMAL(19, 4) NOT NULL CHECK (importe_exonerado >= 0),
+    importe_exento DECIMAL(19, 4) NOT NULL CHECK (importe_exento >= 0),
+    importe_gravado DECIMAL(19, 4) NOT NULL CHECK (importe_gravado >= 0),
+    descuentos decimal(19, 4) NOT NULL CHECK (descuentos >= 0),
+    subtotal decimal(19, 4) NOT NULL CHECK (subtotal > 0),
+    isv decimal(3, 2) DEFAULT(0.15) NOT NULL CHECK (isv >= 0 AND isv <= 1),
+    monto_isv decimal(19, 4) NOT NULL CHECK (monto_isv >= 0),
+    total decimal(19, 4) NOT NULL CHECK (total > 0),
     entrega_domicilio boolean DEFAULT(FALSE) NOT NULL,
     estado varchar(20) DEFAULT('Pendiente') NOT NULL
         CHECK(estado IN ('Pendiente', 'Atrasado', 'Completado', 'Cancelado'))
@@ -350,22 +350,25 @@ CREATE TABLE pedidos(
 
 CREATE TABLE detalles_pedidos(
     id_detalles_pedido integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE,
-    id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
+    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE NOT NULL,
+    id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT NOT NULL,
     id_promocion integer REFERENCES promociones(id_promocion) ON DELETE RESTRICT,
-    precio_venta decimal(19, 4) NOT NULL,
-    cantidad integer NOT NULL,
-    subtotal decimal(19, 4) NOT NULL,
-    descuento decimal(3, 2) NOT NULL,
-    monto_descuento decimal(19, 4) NOT NULL,
-    subtotal_descuento decimal(19, 4) NOT NULL
+    precio_venta decimal(19, 4) NOT NULL 
+        CHECK(precio_venta > 0),
+    cantidad integer NOT NULL CHECK (cantidad > 0),
+    subtotal decimal(19, 4) NOT NULL 
+        CHECK(subtotal > 0),
+    descuento decimal(3, 2) NOT NULL CHECK (descuento >= 0 AND descuento <= 1),
+    monto_descuento decimal(19, 4) NOT NULL CHECK (monto_descuento >= 0 AND monto_descuento <= subtotal),
+    subtotal_descuento decimal(19, 4) NOT NULL 
+        CHECK (subtotal_descuento >= 0)
 );
 
 CREATE TABLE envios(
     id_envio integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE,
-    id_repartidor integer REFERENCES repartidores(id_repartidor) ON DELETE RESTRICT,
-    id_direccion integer REFERENCES direcciones(id_direccion) ON DELETE RESTRICT,
+    id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE NOT NULL,
+    id_repartidor integer REFERENCES repartidores(id_repartidor) ON DELETE RESTRICT NOT NULL,
+    id_direccion integer REFERENCES direcciones(id_direccion) ON DELETE RESTRICT NOT NULL,
     numero_guia varchar(20) UNIQUE NOT NULL,
     observaciones varchar(500),
     estado varchar(20) DEFAULT('En preparacion') NOT NULL
