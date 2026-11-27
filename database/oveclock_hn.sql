@@ -9,15 +9,18 @@ BEGIN
 END $$;
 
 -- Creacion de las tablas requeridas
-CREATE TABLE usuarios(
+/* CREATE TABLE usuarios(
     id_usuario integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre varchar(20) UNIQUE NOT NULL,
     contrasena varchar(100) NOT NULL,
     fecha_creacion timestamp DEFAULT(current_timestamp) NOT NULL,
-    url_foto varchar(255) NULL,
+    url_foto varchar(500),
     -- Valor para determinar los permisos del usuario
-    administrador boolean DEFAULT(FALSE) NOT NULL
+    administrador boolean DEFAULT(FALSE) NOT NULL,
+    rol_administrador varchar(20)
+        CHECK (rol_administrador IN ('Empleado', 'Gerente', 'Supervisor'))
 );
+*/
 
 CREATE TABLE clientes(
     id_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -39,6 +42,7 @@ CREATE TABLE clientes(
     estado boolean DEFAULT(TRUE) NOT NULL
 );
 
+/*
 CREATE TABLE usuarios_clientes(
     id_usuario_cliente integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     -- El usuario solo puede estar presente una vez en la tabla, para un cliente
@@ -46,6 +50,7 @@ CREATE TABLE usuarios_clientes(
     id_cliente integer REFERENCES clientes(id_cliente) ON DELETE RESTRICT,
     ultimo_acceso timestamp
 );
+*/
 
 CREATE TABLE paises(
     id_pais integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

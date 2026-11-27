@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins, pagination
+from rest_framework import viewsets
 
 from apps.inventario.models import (
     Categoria, Marca, Producto, Especificacion, 

@@ -135,7 +135,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
@@ -163,3 +162,7 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1', 'v2', 'v3']
 }
+
+# Configuracion para habilitar el usuario personalizado
+# Debe apuntar a la clase User de Django, o a la clase customizada de Usuario
+AUTH_USER_MODEL = 'usuarios.Usuario'
