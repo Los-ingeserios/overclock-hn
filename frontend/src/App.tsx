@@ -9,6 +9,14 @@ import { GuestRoute } from "./components/auth/GuestRoute";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { CatalogPage } from "./pages/CatalogPage";
+import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
+import { AdminCountriesPage } from "./pages/admin/AdminCountriesPage";
+import { AdminBrandsPage } from "./pages/admin/AdminBrandsPage";
+import { AdminDepartmentsPage } from "./pages/admin/AdminDepartmentsPage";
+import { AdminCitiesPage } from "./pages/admin/AdminCitiesPage";
+import { AdminAddressesPage } from "./pages/admin/AdminAddressesPage";
+import { AdminClientsPage } from "./pages/admin/AdminClientsPage";
+import { AdminClientAddressesPage } from "./pages/admin/AdminClientAddressesPage";
 
 function PlaceholderPage({ title }: { title: string }) {
 	return (
@@ -41,6 +49,14 @@ function App() {
 					{/* Administrator-only routes */}
 					<Route element={<ProtectedRoute requireAdmin />}>
 						<Route path="/admin" element={<PlaceholderPage title="Panel Administrativo" />} />
+						<Route path="/admin/categorias" element={<AdminCategoriesPage />} />
+						<Route path="/admin/paises" element={<AdminCountriesPage />} />
+						<Route path="/admin/marcas" element={<AdminBrandsPage />} />
+						<Route path="/admin/departamentos" element={<AdminDepartmentsPage />} />
+						<Route path="/admin/ciudades" element={<AdminCitiesPage />} />
+						<Route path="/admin/direcciones" element={<AdminAddressesPage />} />
+						<Route path="/admin/clientes" element={<AdminClientsPage />} />
+						<Route path="/admin/direcciones-clientes" element={<AdminClientAddressesPage />} />
 					</Route>
 					{/* 404 Error */}
 					<Route path="*" element={<NotFoundPage />} />
