@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
-from apps.usuarios.views import RegistroViewSet,  UsuarioViewSet
+from apps.usuarios.views import RegistroViewSet, UsuarioViewSet
 
 usuarios_router = SimpleRouter()
 usuarios_router.register(r'registro', RegistroViewSet)

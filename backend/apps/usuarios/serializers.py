@@ -1,7 +1,7 @@
 from typing import Any
 
 from rest_framework import serializers
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 
 # Se toma el usuario actual con el metodo get_user_model()
 # Esto permite evitar errores si a futuro se usa otro modelo de usuario
@@ -55,15 +55,3 @@ class UsuarioAllSerializer(serializers.ModelSerializer):
                   "is_admin", "rol_admin", "is_active"]
         extra_kwargs = {"password": {"write_only": True},
                         "date_joined": {"read_only": True}}
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
-
-    # Se suprime la advertencia debido a una validacion de pyright, pero el tipo de retorno del metodo es valido
-    def validate(self, data): # pyright: ignore[reportIncompatibleMethodOverride]
-        user = authenticate(**data)
-        if user and user.is_active:
-            return user
-
-        raise serializers.ValidationError("Las credenciales del usuario no son correctas")

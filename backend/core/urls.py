@@ -15,8 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 # from django.contrib import admin
-from django.urls import include, re_path
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
+
+# Rutas de autentication provistas por SimpleJWT
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 # Se importan los routers individuales de cada aplicacion
 from apps.inventario.urls import inventario_router
@@ -34,6 +41,11 @@ api_v1_router.registry.extend(usuarios_router.registry)
 urlpatterns = [
     # path('admin/', admin.site.urls),
     
+    # Rutas de autentication
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
     # Se incluye unicamente las urls del router de la api
     # El atributo namespace debe ser unico, y cada nuevo registro debe corresponder a una nueva version 'v2', 'v3'...
     re_path(r'^api/v1/', include((api_v1_router.urls, 'api_v1'), namespace='v1')),

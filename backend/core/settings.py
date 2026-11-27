@@ -14,6 +14,9 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import environ
 from pathlib import Path
 
+# Se importa datetime para especificar el tiempo de vencimiento de los token
+from datetime import timedelta
+
 env = environ.Env(
     DEBUG=(bool, False)
 )
@@ -51,6 +54,7 @@ INSTALLED_APPS = [
     # Third-party libraries
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt',
     # Custom Apps for the project
     'apps.usuarios',
     'apps.compras',
@@ -160,9 +164,26 @@ REST_FRAMEWORK = {
     # Configuracion de versionamiento
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
     'DEFAULT_VERSION': 'v1',
-    'ALLOWED_VERSIONS': ['v1', 'v2', 'v3']
+    'ALLOWED_VERSIONS': ['v1', 'v2', 'v3'],
+
+    # Configuracion de la clase empleada para la autenticacion
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+
+    # Definicion del tipo de autentication requerido.
+    # Al aplicarlo en este archivo, se requiere autentication para toda la API
+    # Con el fin de proteger todos los endpoints, y seleccionar unicamente los que se quieren mostrar sin permisos 
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #    'rest_framework.permissions.IsAuthenticated',
+    #],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 # Configuracion para habilitar el usuario personalizado
-# Debe apuntar a la clase User de Django, o a la clase customizada de Usuario
+# Por defecto apunta a la clase User de Django, y se debe escribir para apuntar a la clase personalizada de Usuario
 AUTH_USER_MODEL = 'usuarios.Usuario'
