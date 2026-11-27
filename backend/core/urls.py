@@ -22,12 +22,14 @@ from rest_framework.routers import DefaultRouter
 from apps.inventario.urls import inventario_router
 from apps.direcciones.urls import direcciones_router
 from apps.gestion_empresarial.urls import gestion_empresarial_router
+from apps.pedidos.urls import pedidos_router
 
 # Se crea un router unico para cada version de la api, al cual se agregan los routers de las aplicaciones
 api_v1_router = DefaultRouter()
 api_v1_router.registry.extend(inventario_router.registry)
 api_v1_router.registry.extend(direcciones_router.registry)
 api_v1_router.registry.extend(gestion_empresarial_router.registry)
+api_v1_router.registry.extend(pedidos_router.registry)
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
