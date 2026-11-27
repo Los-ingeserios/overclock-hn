@@ -3,6 +3,35 @@ import type { Product } from "../types/products";
 import { mapApiProductToUi } from "../types/catalog";
 import type { ApiBrand, ApiCategory } from "../types/catalog";
 import { catalogService } from "../services/catalogService";
+import { parseApiError } from "../lib/apiError";
+
+interface CatalogData {
+	products: Product[];
+	totalCount: number;
+	hasNext: boolean;
+	hasPrevious: boolean;
+	categories: ApiCategory[];
+	brands: ApiBrand[];
+}
+
+async function requestCatalogData(targetPage: number): Promise<CatalogData> {
+	const [prodRes, catRes, brandRes] = await Promise.all([
+		catalogService.getProducts(targetPage),
+		catalogService.getCategories(),
+		catalogService.getBrands(),
+	]);
+
+	return {
+		products: prodRes.results.map(mapApiProductToUi),
+		totalCount: prodRes.count,
+		hasNext: Boolean(prodRes.next),
+		hasPrevious: Boolean(prodRes.previous),
+		categories: catRes.results,
+		brands: brandRes.results,
+	};
+}
+
+const CATALOG_FALLBACK_ERROR = "No se pudo cargar el catalogo desde el servidor.";
 
 export function useCatalog() {
 	const [products, setProducts] = useState<Product[]>([]);
@@ -21,40 +50,63 @@ export function useCatalog() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const fetchCatalog = useCallback(async (targetPage: number) => {
-		setLoading(true);
-		setError(null);
-
-		try {
-			const [prodRes, catRes, brandRes] = await Promise.all([
-				catalogService.getProducts(targetPage),
-				catalogService.getCategories(),
-				catalogService.getBrands(),
-			]);
-
-			setProducts(prodRes.results.map(mapApiProductToUi));
-			setTotalCount(prodRes.count);
-			setHasNext(Boolean(prodRes.next));
-			setHasPrevious(Boolean(prodRes.previous));
-
-			setCategories(catRes.results);
-			setBrands(brandRes.results);
-		} catch {
-			setError(
-				"No se pudo cargar el catalogo desde el servidor. Verificar que Django este corriendo en el puerto 8000.",
-			);
-		} finally {
-			setLoading(false);
-		}
+	const applyCatalogData = useCallback((data: CatalogData) => {
+		setProducts(data.products);
+		setTotalCount(data.totalCount);
+		setHasNext(data.hasNext);
+		setHasPrevious(data.hasPrevious);
+		setCategories(data.categories);
+		setBrands(data.brands);
 	}, []);
 
-	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			void fetchCatalog(page);
-		}, 0);
+	const fetchCatalog = useCallback(
+		async (targetPage: number) => {
+			setLoading(true);
+			setError(null);
 
-		return () => clearTimeout(timeoutId);
-	}, [page, fetchCatalog]);
+			try {
+				const data = await requestCatalogData(targetPage);
+				applyCatalogData(data);
+			} catch (err) {
+				setError(parseApiError(err, CATALOG_FALLBACK_ERROR));
+			} finally {
+				setLoading(false);
+			}
+		},
+		[applyCatalogData],
+	);
+
+	useEffect(() => {
+		let active = true;
+
+		Promise.resolve()
+			.then(() => {
+				if (!active) return null;
+				setLoading(true);
+				setError(null);
+				return requestCatalogData(page);
+			})
+			.then((data) => {
+				if (!active || !data) return;
+				applyCatalogData(data);
+			})
+			.catch((err) => {
+				if (!active) return;
+				setError(
+					parseApiError(
+						err,
+						"No se pudo cargar el catalogo desde el servidor. Verificar que Django este corriendo en el puerto 8000.",
+					),
+				);
+			})
+			.finally(() => {
+				if (active) setLoading(false);
+			});
+
+		return () => {
+			active = false;
+		};
+	}, [page, applyCatalogData]);
 
 	const productosFiltrados = useMemo(() => {
 		const q = busqueda.trim().toLowerCase();
