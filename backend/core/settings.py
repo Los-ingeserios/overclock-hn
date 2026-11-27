@@ -59,7 +59,9 @@ INSTALLED_APPS = [
     'apps.gestion_empresarial',
     'apps.inventario',
     'apps.pagos',
-    'apps.pedidos',    
+    'apps.pedidos',
+    'apps.proveedores', 
+    'apps.garantias',
 ]
 
 MIDDLEWARE = [
