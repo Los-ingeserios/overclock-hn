@@ -1,12 +1,12 @@
 from rest_framework import viewsets, mixins, pagination
 
 from apps.inventario.models import (
-    Categoria, Marca, Producto, Especificacion, 
+    Categoria, Marca, Producto, Especificacion,
     TipoPromocion, Promocion, PromocionProducto
 )
 
 from apps.inventario.serializers import (
-    CategoriaSerializer, MarcaSerializer, ProductoAllSerializer, EspecificacionSerializer, ProductoListSerializer, 
+    CategoriaSerializer, MarcaSerializer, ProductoAllSerializer, EspecificacionSerializer, ProductoListSerializer,
     ProductoDetailSerializer, TipoPromocionSerializer, PromocionSerializer, PromocionProductoSerializer
 )
 
@@ -30,8 +30,12 @@ class ProductoViewSet(viewsets.ModelViewSet):
                 return ProductoListSerializer
             if self.action == "retrieve": # Utilizado cuando se busca un producto por su id
                 return ProductoDetailSerializer
-                
+
         return ProductoAllSerializer # Se retorna todo el modelo en el caso de que se utilice otro metodo
+
+class ProductoAdminViewSet(viewsets.ModelViewSet):
+    queryset = Producto.objects.select_related("id_categoria", "id_marca").order_by("codigo_sku", "id_producto")
+    serializer_class = ProductoAllSerializer
 
 class EspecificacionViewSet(viewsets.ModelViewSet):
     queryset = Especificacion.objects.select_related("id_producto").all().order_by("especificacion", "id_especificacion")

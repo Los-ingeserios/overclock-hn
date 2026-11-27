@@ -40,7 +40,7 @@ class Producto(models.Model):
     stock = models.IntegerField()
     descripcion = models.CharField(max_length=200, blank=True, null=True)
     # La funcion Now() es equivalente a current_timestamp en la base de datos
-    fecha_ingreso = models.DateTimeField(db_default=Now())
+    fecha_ingreso = models.DateTimeField(db_default=Now(), editable=False)
     url_img = models.CharField(max_length=500, blank=True, null=True)
     estado = models.BooleanField(db_default=True)
 
@@ -86,7 +86,7 @@ class PromocionProducto(models.Model):
     # Opciones para crear un choice
     # Esto permite mostrar un menu desplegable en la api al momento de crear una nueva instancia
     # En este caso, las constantes corresponden con la clave y deben coincidir con el check en la base de datos
-    # Es como un mapa, la clave se guarda en la BD y el valor es lo que se muestra en la API    
+    # Es como un mapa, la clave se guarda en la BD y el valor es lo que se muestra en la API
     REQUERIDO = "Requerido"
     BENEFICIO = "Beneficio"
     AMBOS = "Ambos"
@@ -106,4 +106,3 @@ class PromocionProducto(models.Model):
     class Meta:
         managed = False
         db_table = 'promociones_productos'
-        

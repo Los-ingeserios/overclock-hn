@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./index.css";
 import ClientLayout from "./components/ClientLayout";
 import { HomePage } from "./pages/HomePage";
@@ -17,6 +17,8 @@ import { AdminCitiesPage } from "./pages/admin/AdminCitiesPage";
 import { AdminAddressesPage } from "./pages/admin/AdminAddressesPage";
 import { AdminClientsPage } from "./pages/admin/AdminClientsPage";
 import { AdminClientAddressesPage } from "./pages/admin/AdminClientAddressesPage";
+import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
+import { AdminLayout } from "./layouts/AdminLayout";
 
 function PlaceholderPage({ title }: { title: string }) {
 	return (
@@ -48,15 +50,18 @@ function App() {
 					</Route>
 					{/* Administrator-only routes */}
 					<Route element={<ProtectedRoute requireAdmin />}>
-						<Route path="/admin" element={<PlaceholderPage title="Panel Administrativo" />} />
-						<Route path="/admin/categorias" element={<AdminCategoriesPage />} />
-						<Route path="/admin/paises" element={<AdminCountriesPage />} />
-						<Route path="/admin/marcas" element={<AdminBrandsPage />} />
-						<Route path="/admin/departamentos" element={<AdminDepartmentsPage />} />
-						<Route path="/admin/ciudades" element={<AdminCitiesPage />} />
-						<Route path="/admin/direcciones" element={<AdminAddressesPage />} />
-						<Route path="/admin/clientes" element={<AdminClientsPage />} />
-						<Route path="/admin/direcciones-clientes" element={<AdminClientAddressesPage />} />
+						<Route path="/admin" element={<AdminLayout />}>
+							<Route index element={<Navigate to="/admin/productos" replace />} />
+							<Route path="productos" element={<AdminProductsPage />} />
+							<Route path="categorias" element={<AdminCategoriesPage />} />
+							<Route path="marcas" element={<AdminBrandsPage />} />
+							<Route path="paises" element={<AdminCountriesPage />} />
+							<Route path="departamentos" element={<AdminDepartmentsPage />} />
+							<Route path="ciudades" element={<AdminCitiesPage />} />
+							<Route path="direcciones" element={<AdminAddressesPage />} />
+							<Route path="clientes" element={<AdminClientsPage />} />
+							<Route path="direcciones-clientes" element={<AdminClientAddressesPage />} />
+						</Route>
 					</Route>
 					{/* 404 Error */}
 					<Route path="*" element={<NotFoundPage />} />
