@@ -10,20 +10,28 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+# Se importa el paquete django-environ para poder realizar la configuracion usando variables de entorno
+import environ
 from pathlib import Path
+
+env = environ.Env(
+    DEBUG=(bool, False)
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Lee las variables de entorno desde el archivo en la ruta base del proyecto
+environ.Env.read_env(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e047zwv)#sz(8psnoidf=or5tv1ii43^7$=nqaw@%#1v(sl(87'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -38,11 +46,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Aplicacion para reconocer los tipos de datos de PostgreSQL
+    'django.contrib.postgres',
     # Third-party libraries
     'rest_framework',
     'corsheaders',
     # Custom Apps for the project
     'apps.usuarios',
+    'apps.compras',
+    'apps.direcciones',
+    'apps.facturacion',
+    'apps.gestion_empresarial',
+    'apps.inventario',
+    'apps.pagos',
+    'apps.pedidos',
+    'apps.proveedores', 
+    'apps.garantias',
 ]
 
 MIDDLEWARE = [
@@ -82,14 +101,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 # Database configuration
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'overclock_hn',
-        'USER': 'postgres',
-        'PASSWORD': 'OverClock_HN_IIIPAC_2026.',
-        'HOST': 'localhost',
-        'PORT': '5432'
-    }
+    # La funcion db() busca el valor de la variabla de entorno DATABASE_URL
+    # Esto incluye host, puerto, nombre de base de datos e informacion de autenticacion
+    'default': env.db()
 }
 
 
@@ -137,4 +151,17 @@ MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
+}
+
+# Configuraciones respectiva a la API REST
+REST_FRAMEWORK = {
+    # Configuracion dedicada a la paginacion en las respuestas
+    # Se aplica a todos los objetos
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+
+    # Configuracion de versionamiento
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'DEFAULT_VERSION': 'v1',
+    'ALLOWED_VERSIONS': ['v1', 'v2', 'v3']
 }
