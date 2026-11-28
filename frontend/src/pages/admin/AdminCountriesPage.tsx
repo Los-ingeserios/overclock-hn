@@ -149,7 +149,7 @@ export function AdminCountriesPage() {
 									{...register("estado")}
 									className="sr-only peer"
 								/>
-								<div className="w-11 h-6 bg-brand-divider peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-primary relative"></div>
+								<div className="w-11 h-6 bg-brand-divider peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-primary relative"></div>
 							</label>
 						</div>
 
@@ -213,10 +213,7 @@ export function AdminCountriesPage() {
 								<tbody className="divide-y divide-brand-divider/60 text-sm">
 									{filtered.length > 0 ? (
 										filtered.map((item) => (
-											<tr
-												key={item.id_pais}
-												className="hover:bg-brand-bg/40 transition-colors"
-											>
+											<tr key={item.id_pais} className="hover:bg-brand-bg/40 transition-colors">
 												<td className="py-3.5 px-3 font-mono text-xs text-brand-muted">
 													#{item.id_pais}
 												</td>
@@ -252,7 +249,10 @@ export function AdminCountriesPage() {
 															title="Eliminar"
 														>
 															{deletingId === item.id_pais ? (
-																<Loader2 size={16} className="animate-spin text-red-400" />
+																<Loader2
+																	size={16}
+																	className="animate-spin text-red-400"
+																/>
 															) : (
 																<Trash2 size={16} />
 															)}

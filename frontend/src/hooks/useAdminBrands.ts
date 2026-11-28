@@ -21,7 +21,7 @@ const BRAND_MESSAGES: CrudMessages = {
 
 export function useAdminBrands() {
 	const [countries, setCountries] = useState<CountryOption[]>([]);
-	const [loadingCountries, setLoadingCountries] = useState(false);
+	const [loadingCountries, setLoadingCountries] = useState(true);
 
 	const countryNameMap = useMemo(() => {
 		const map = new Map<number, string>();
@@ -31,15 +31,11 @@ export function useAdminBrands() {
 		return map;
 	}, [countries]);
 
-	const getCountryName = useCallback(
-		(id: number) => countryNameMap.get(id) ?? `País #${id}`,
-		[countryNameMap],
-	);
+	const getCountryName = useCallback((id: number) => countryNameMap.get(id) ?? `País #${id}`, [countryNameMap]);
 
 	const filterBrand = useCallback(
 		(item: Brand, q: string) =>
-			item.nombre.toLowerCase().includes(q) ||
-			getCountryName(item.id_pais).toLowerCase().includes(q),
+			item.nombre.toLowerCase().includes(q) || getCountryName(item.id_pais).toLowerCase().includes(q),
 		[getCountryName],
 	);
 
@@ -53,7 +49,6 @@ export function useAdminBrands() {
 
 	useEffect(() => {
 		let active = true;
-		setLoadingCountries(true);
 		brandService
 			.getAllCountries()
 			.then((list) => {
