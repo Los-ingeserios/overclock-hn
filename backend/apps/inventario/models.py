@@ -71,7 +71,7 @@ class Promocion(models.Model):
     id_tipo_promocion = models.ForeignKey(TipoPromocion, db_column='id_tipo_promocion', blank=True, null=True, on_delete=models.RESTRICT)
     fecha_inicio = models.DateField()
     fecha_vencimiento = models.DateField(blank=True, null=True)
-    porcentaje_descuento = models.DecimalField(max_digits=3, decimal_places=2)
+    porcentaje_descuento = models.DecimalField(max_digits=5, decimal_places=2)
     cantidad_requerida = models.IntegerField(db_default=1)
     cantidad_beneficio = models.IntegerField(db_default=1)
     estado = models.BooleanField(db_default=True)

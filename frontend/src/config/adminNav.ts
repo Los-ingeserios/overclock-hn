@@ -123,7 +123,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
 				icon: Tags,
 				table: "tipo_promocion",
 				endpoint: "/api/v1/tipo-promociones/",
-				status: "pending",
+				status: "ready",
 				description: "Catálogo de tipos de descuentos, combos y 2x1.",
 			},
 			{
@@ -132,7 +132,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
 				icon: Percent,
 				table: "promociones",
 				endpoint: "/api/v1/promociones/",
-				status: "pending",
+				status: "ready",
 				description: "Reglas, porcentajes y fechas de vigencia de promociones.",
 			},
 			{
@@ -141,7 +141,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
 				icon: Sparkles,
 				table: "promociones_productos",
 				endpoint: "/api/v1/promociones-productos/",
-				status: "pending",
+				status: "ready",
 				description: "Asignación de productos con rol Requerido, Beneficio o Ambos.",
 			},
 		],
