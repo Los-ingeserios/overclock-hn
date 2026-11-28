@@ -1,12 +1,12 @@
 import { createCrudService } from "./createCrudService";
-import type { ApiClientAddress, CreateClientAddressPayload, AddressOption } from "../types/clientAddress";
-import type { ApiClient } from "../types/client";
+import type { AddressOption, ClientAddress, ClientAddressPayload } from "../types/clientAddress";
+import type { Client } from "../types/client";
 
-const clientLookupService = createCrudService<ApiClient, never>("/clientes/");
+const clientLookupService = createCrudService<Client, never>("/clientes/");
 const addressLookupService = createCrudService<AddressOption, never>("/direcciones/");
 
 export const clientAddressService = {
-  ...createCrudService<ApiClientAddress, CreateClientAddressPayload>("/direcciones-clientes/"),
-  getAllClients: clientLookupService.getAllPages,
-  getAllAddresses: addressLookupService.getAllPages,
+	...createCrudService<ClientAddress, ClientAddressPayload>("/direcciones-clientes/"),
+	getAllClients: clientLookupService.getAllPages,
+	getAllAddresses: addressLookupService.getAllPages,
 };

@@ -83,7 +83,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
 				icon: Cpu,
 				table: "especificaciones",
 				endpoint: "/api/v1/especificaciones/",
-				status: "pending",
+				status: "ready",
 				description: "Ficha técnica y atributos detallados por producto.",
 			},
 			{

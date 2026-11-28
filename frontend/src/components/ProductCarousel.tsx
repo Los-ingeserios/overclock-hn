@@ -5,11 +5,11 @@ import { ProductCard } from "./ProductCard";
 
 import "swiper/css";
 import "swiper/css/navigation";
-import type { Product } from "../types/products";
+import type { CatalogProduct } from "../types/products";
 
 interface ProductCarouselProps {
 	title: string;
-	products: Product[];
+	products: CatalogProduct[];
 }
 
 export function ProductCarousel({ title, products }: ProductCarouselProps) {
@@ -32,7 +32,7 @@ export function ProductCarousel({ title, products }: ProductCarouselProps) {
 				className="px-6"
 			>
 				{products.map((product) => (
-					<SwiperSlide key={product.id} className="px-4 pb-6">
+					<SwiperSlide key={product.id_producto} className="px-4 pb-6">
 						<ProductCard product={product} />
 					</SwiperSlide>
 				))}

@@ -14,6 +14,7 @@ import {
 	RefreshCw,
 } from "lucide-react";
 import { useAdminClientAddresses } from "../../hooks/useAdminClientAddresses";
+import { formatClientName } from "../../lib/format";
 
 export function AdminClientAddressesPage() {
 	const {
@@ -122,7 +123,7 @@ export function AdminClientAddressesPage() {
 						)}
 					</div>
 
-					<form onSubmit={onSubmit} className="space-y-4">
+					<form onSubmit={onSubmit} className="space-y-4" noValidate>
 						{/* Selección de Cliente */}
 						<div>
 							<label htmlFor="dc-cliente" className="block text-sm font-medium text-brand-white mb-1.5">
@@ -137,21 +138,11 @@ export function AdminClientAddressesPage() {
 								<option value="">
 									{loadingOptions ? "Cargando clientes..." : "Selecciona un cliente..."}
 								</option>
-								{clients.map((cli) => {
-									const fullName = [
-										cli.primer_nombre,
-										cli.segundo_nombre,
-										cli.primer_apellido,
-										cli.segundo_apellido,
-									]
-										.filter(Boolean)
-										.join(" ");
-									return (
-										<option key={cli.id_cliente} value={String(cli.id_cliente)}>
-											#{cli.id_cliente} — {fullName}
-										</option>
-									);
-								})}
+								{clients.map((cli) => (
+									<option key={cli.id_cliente} value={String(cli.id_cliente)}>
+										#{cli.id_cliente} — {formatClientName(cli)}
+									</option>
+								))}
 							</select>
 							{fieldErrors.id_cliente && (
 								<p className="text-xs text-red-400 mt-1">{fieldErrors.id_cliente.message}</p>
@@ -202,6 +193,16 @@ export function AdminClientAddressesPage() {
 								{isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
 								<span>{editingId ? "Guardar Cambios" : "Asignar"}</span>
 							</button>
+							{editingId && (
+								<button
+									type="button"
+									disabled={isSubmitting}
+									onClick={resetForm}
+									className="px-4 py-2.5 rounded-full border border-brand-divider text-sm text-brand-muted hover:text-brand-white transition-colors cursor-pointer"
+								>
+									Cancelar
+								</button>
+							)}
 						</div>
 					</form>
 				</div>
@@ -313,7 +314,7 @@ export function AdminClientAddressesPage() {
 						<div className="flex gap-2">
 							<button
 								type="button"
-								disabled={!hasPrevious}
+								disabled={!hasPrevious || loading}
 								onClick={() => setPage((p) => Math.max(1, p - 1))}
 								className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-brand-divider text-xs text-brand-white hover:border-brand-primary disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
 							>
@@ -321,7 +322,7 @@ export function AdminClientAddressesPage() {
 							</button>
 							<button
 								type="button"
-								disabled={!hasNext}
+								disabled={!hasNext || loading}
 								onClick={() => setPage((p) => p + 1)}
 								className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-brand-divider text-xs text-brand-white hover:border-brand-primary disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
 							>

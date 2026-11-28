@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { departmentService } from "../services/departmentService";
-import type { Department, DepartmentPayload, CountryOption } from "../types/department";
+import type { Department, DepartmentPayload } from "../types/department";
 import { useCrudResource, type CrudMessages } from "./useCrudResource";
 import { departmentSchema, type DepartmentFormInput } from "../schemas/department.schema";
 import { parseApiError } from "../lib/apiError";
+import type { Country } from "../types/country";
 
 const DEPARTMENT_MESSAGES: CrudMessages = {
 	loadError: "No se pudieron cargar los departamentos.",
@@ -19,7 +20,7 @@ const DEPARTMENT_MESSAGES: CrudMessages = {
 };
 
 export function useAdminDepartments() {
-	const [countries, setCountries] = useState<CountryOption[]>([]);
+	const [countries, setCountries] = useState<Country[]>([]);
 	const [loadingCountries, setLoadingCountries] = useState(true);
 
 	const countryNameMap = useMemo(() => {

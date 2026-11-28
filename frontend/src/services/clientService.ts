@@ -1,4 +1,4 @@
+import type { Client, ClientPayload } from "../types/client";
 import { createCrudService } from "./createCrudService";
-import type { ApiClient, CreateClientPayload } from "../types/client";
 
-export const clientService = createCrudService<ApiClient, CreateClientPayload>("/clientes/");
+export const clientService = createCrudService<Client, ClientPayload>("/clientes/");

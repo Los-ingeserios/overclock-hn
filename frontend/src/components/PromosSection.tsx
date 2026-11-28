@@ -1,7 +1,8 @@
-import type { Product } from "../types/products";
+import { formatLempira, getProductImage } from "../lib/format";
+import type { PromoProduct } from "../types/products";
 
 interface PromosSectionProps {
-	products: Product[];
+	products: PromoProduct[];
 }
 
 export default function PromosSection({ products }: PromosSectionProps) {
@@ -12,25 +13,25 @@ export default function PromosSection({ products }: PromosSectionProps) {
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 				{products.map((item) => (
 					<article
-						key={item.id}
+						key={item.id_producto}
 						className="flex flex-col-reverse lg:flex-row items-center justify-between gap-6 p-7 lg:p-9 rounded-2xl bg-brand-divider/40 border border-brand-divider hover:border-brand-primary/40 transition-colors text-center lg:text-left"
 					>
 						<div className="w-full lg:w-1/2">
-							{item.badge && (
+							{item.etiqueta && (
 								<span className="inline-block text-xs font-semibold uppercase bg-brand-primary/20 text-brand-primary px-3 py-1 rounded-full mb-3">
-									{item.badge}
+									{item.etiqueta}
 								</span>
 							)}
-							<h3 className="text-xl font-semibold text-brand-white leading-snug">{item.name}</h3>
+							<h3 className="text-xl font-semibold text-brand-white leading-snug">{item.modelo}</h3>
 
 							<div className="flex flex-col lg:flex-row items-center lg:items-baseline gap-1 lg:gap-4 my-4">
-								{item.originalPrice && (
+								{item.precio_original !== undefined && (
 									<p className="text-lg text-brand-muted line-through">
-										L. {item.originalPrice.toLocaleString("es-HN")}
+										{formatLempira(item.precio_original)}
 									</p>
 								)}
 								<p className="text-xl font-semibold text-brand-primary">
-									L. {item.price.toLocaleString("es-HN")}
+									{formatLempira(item.precio_venta)}
 								</p>
 							</div>
 
@@ -44,8 +45,8 @@ export default function PromosSection({ products }: PromosSectionProps) {
 
 						<div className="w-full lg:w-1/2 flex justify-center">
 							<img
-								src={item.image}
-								alt={item.name}
+								src={getProductImage(item.url_img)}
+								alt={item.modelo}
 								loading="lazy"
 								className="w-40 h-40 object-contain rounded-xl"
 							/>

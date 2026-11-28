@@ -3,10 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { brandService } from "../services/brandService";
 import type { Brand, BrandPayload } from "../types/brand";
-import type { CountryOption } from "../types/department";
 import { useCrudResource, type CrudMessages } from "./useCrudResource";
 import { brandSchema, type BrandFormInput } from "../schemas/brand.schema";
 import { parseApiError } from "../lib/apiError";
+import type { Country } from "../types/country";
 
 const BRAND_MESSAGES: CrudMessages = {
 	loadError: "No se pudieron cargar las marcas.",
@@ -20,7 +20,7 @@ const BRAND_MESSAGES: CrudMessages = {
 };
 
 export function useAdminBrands() {
-	const [countries, setCountries] = useState<CountryOption[]>([]);
+	const [countries, setCountries] = useState<Country[]>([]);
 	const [loadingCountries, setLoadingCountries] = useState(true);
 
 	const countryNameMap = useMemo(() => {

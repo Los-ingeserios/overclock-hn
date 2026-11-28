@@ -1,9 +1,11 @@
 import { api } from "../lib/api";
-import type { AdminProduct, BrandOption, CategoryOption, ProductPayload } from "../types/products";
+import type { Brand } from "../types/brand";
+import type { Category } from "../types/category";
+import type { AdminProduct, ProductPayload } from "../types/products";
 import { createCrudService } from "./createCrudService";
 
-const categoryLookupService = createCrudService<CategoryOption, never>("/categorias/");
-const brandLookupService = createCrudService<BrandOption, never>("/marcas/");
+const categoryLookupService = createCrudService<Category, never>("/categorias/");
+const brandLookupService = createCrudService<Brand, never>("/marcas/");
 
 export const adminProductService = {
 	...createCrudService<AdminProduct, ProductPayload>("/productos-admin/"),

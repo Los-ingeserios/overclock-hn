@@ -14,7 +14,8 @@ import {
 	RefreshCw,
 } from "lucide-react";
 import { useAdminClients } from "../../hooks/useAdminClients";
-import type { ApiClient } from "../../types/client";
+import { MAX_BIRTH_DATE } from "../../schemas/client.schema";
+import { formatClientName } from "../../lib/format";
 
 export function AdminClientsPage() {
 	const {
@@ -41,11 +42,6 @@ export function AdminClientsPage() {
 		handleDelete,
 		recargar,
 	} = useAdminClients();
-
-	const getFullName = (c: ApiClient) =>
-		[c.primer_nombre, c.segundo_nombre, c.primer_apellido, c.segundo_apellido].filter(Boolean).join(" ");
-
-	const MAX_BIRTH_DATE = `${new Date().getFullYear() - 18}-12-31`;
 
 	return (
 		<section className="max-w-full mx-auto px-5 py-8">
@@ -402,7 +398,7 @@ export function AdminClientsPage() {
 												#{item.id_cliente}
 											</td>
 											<td className="py-3.5 px-3 align-top">
-												<p className="font-medium text-brand-white">{getFullName(item)}</p>
+												<p className="font-medium text-brand-white">{formatClientName(item)}</p>
 												{item.razon_social && (
 													<p className="text-xs text-brand-primary mt-0.5">
 														{item.razon_social}

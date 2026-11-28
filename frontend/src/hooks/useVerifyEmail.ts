@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { authService } from "../services/authService";
 import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "../types/auth";
-
+import type { ApiErrorResponse } from "../types/api";
 export type VerifyStatus = "idle" | "verifying" | "success" | "error";
 
 export function useVerifyEmail() {

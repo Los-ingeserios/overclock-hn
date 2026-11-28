@@ -4,7 +4,7 @@ import { type RegisterFormValues, registerSchema } from "../schemas/auth.schema"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../services/authService";
 import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "../types/auth";
+import type { ApiErrorResponse } from "../types/api";
 
 export function useRegister() {
 	const [showPassword, setShowPassword] = useState(false);

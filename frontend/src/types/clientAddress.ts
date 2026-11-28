@@ -1,17 +1,10 @@
-export interface ApiClientAddress {
-  id_direccion_cliente: number;
-  id_direccion: number;
-  id_cliente: number;
-  predeterminada: boolean;
+import type { ClientAddressPayload } from "../schemas/clientAddress.schema";
+import type { Address } from "./address";
+
+export type { ClientAddressPayload };
+
+export interface ClientAddress extends ClientAddressPayload {
+	id_direccion_cliente: number;
 }
 
-export interface CreateClientAddressPayload {
-  id_direccion: number;
-  id_cliente: number;
-  predeterminada: boolean;
-}
-
-export interface AddressOption {
-  id_direccion: number;
-  calle: string;
-}
+export type AddressOption = Pick<Address, "id_direccion" | "calle">;

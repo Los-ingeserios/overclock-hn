@@ -32,9 +32,3 @@ export interface RegisterResponse {
 	correo: string;
 	requiere_verificacion: boolean;
 }
-
-export interface ApiErrorResponse {
-	code?: string;
-	detail?: string;
-	[field: string]: unknown;
-}

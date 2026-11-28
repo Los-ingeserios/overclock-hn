@@ -21,6 +21,8 @@ import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { ALL_ADMIN_NAV_ITEMS } from "./config/adminNav";
 import { AdminModulePlaceholderPage } from "./pages/admin/AdminModulePlaceholderPage";
+import { AdminSpecificationsPage } from "./pages/admin/AdminSpecificationsPage";
+import { ProductDetailPage } from "./pages/ProductDetailPage";
 
 function PlaceholderPage({ title }: { title: string }) {
 	return (
@@ -41,6 +43,7 @@ function App() {
 					<Route path="/catalogo" element={<CatalogPage />} />
 					<Route path="/carrito" element={<PlaceholderPage title="Carritos de Compras" />} />
 					<Route path="/verificar-cuenta" element={<VerifyEmailPage />} />
+					<Route path="/producto/:id" element={<ProductDetailPage />} />
 					{/* Visitors not logged in only */}
 					<Route element={<GuestRoute />}>
 						<Route path="/login" element={<LoginPage />} />
@@ -57,6 +60,7 @@ function App() {
 
 							{/* Módulos construidos */}
 							<Route path="productos" element={<AdminProductsPage />} />
+							<Route path="especificaciones" element={<AdminSpecificationsPage />} />
 							<Route path="categorias" element={<AdminCategoriesPage />} />
 							<Route path="marcas" element={<AdminBrandsPage />} />
 							<Route path="paises" element={<AdminCountriesPage />} />
@@ -65,7 +69,6 @@ function App() {
 							<Route path="direcciones" element={<AdminAddressesPage />} />
 							<Route path="clientes" element={<AdminClientsPage />} />
 							<Route path="direcciones-clientes" element={<AdminClientAddressesPage />} />
-
 							{/* Rutas Placeholder para  modulos pendientes */}
 							{ALL_ADMIN_NAV_ITEMS.filter((item) => item.status === "pending").map((item) => (
 								<Route
