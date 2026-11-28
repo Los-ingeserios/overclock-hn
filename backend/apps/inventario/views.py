@@ -1,4 +1,4 @@
-from rest_framework import viewsets, mixins, pagination
+from rest_framework import viewsets, permissions
 
 from apps.inventario.models import (
     Categoria, Marca, Producto, Especificacion,
@@ -15,9 +15,13 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.order_by("nombre", "id_categoria").all()
     serializer_class = CategoriaSerializer
 
+    permission_classes = [permissions.IsAuthenticated]
+
 class MarcaViewSet(viewsets.ModelViewSet):
     queryset = Marca.objects.order_by("nombre", "id_marca").select_related("id_pais")
     serializer_class = MarcaSerializer
+
+    # permission_classes = [permissions.IsAuthenticated]
 
 # Vista principal de producto
 class ProductoViewSet(viewsets.ModelViewSet):
