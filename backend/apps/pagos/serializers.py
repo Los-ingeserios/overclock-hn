@@ -6,7 +6,7 @@ class TarjetaSerializer(serializers.ModelSerializer):
         model = Tarjeta
         fields = ["id_tarjeta", "id_cliente", "nombre_titular", "numero_tarjeta", "fecha_vencimiento", "cvv", "tipo_tarjeta"]
 
-class MetodosPagoSerializer(serializers.ModelSerializer):  # <--- Debe llamarse exactamente así
+class MetodosPagoSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Metodos_pago
         fields = ["id_metodo_pago", "nombre", "descripcion", "condicion_pago", "numero_referencia", "pago_con_tarjeta"]

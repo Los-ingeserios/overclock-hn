@@ -1,10 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from apps.pagos.views import (
-    TarjetaViewSet,
-    MetodosPagoViewSet,
-    PagoViewSet,
-    DetallesPagosTarjetasViewSet
-)
+from apps.pagos.views import (TarjetaViewSet,MetodosPagoViewSet,PagoViewSet,DetallesPagosTarjetasViewSet)
 
 pagos_router = DefaultRouter()
 pagos_router.register(r'tarjetas', TarjetaViewSet, basename='tarjeta')

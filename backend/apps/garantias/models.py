@@ -16,7 +16,7 @@ class Garantias(models.Model):
     
     class Meta:
         managed = False
-        db_table = 'proveedores'
+        db_table = 'garantias'
 
     def __str__(self):
         return self.nombre
