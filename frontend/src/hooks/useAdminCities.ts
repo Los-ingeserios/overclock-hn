@@ -4,9 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { citySchema, type CityFormInput, type CityPayload } from "../schemas/city.schema";
 import { parseApiError } from "../lib/apiError";
-import type { City, DepartamentOption } from "../types/city";
+import type { City } from "../types/city";
 import { useCrudResource, type CrudMessages } from "./useCrudResource";
 import { cityService } from "../services/cityServices";
+import type { Department } from "../types/department";
 
 const CITY_MESSAGES: CrudMessages = {
 	loadError: "No se pudieron cargar las ciudades.",
@@ -22,7 +23,7 @@ const CITY_MESSAGES: CrudMessages = {
 const DEPARTMENTS_FALLBACK_ERROR = "No se pudieron cargar los departamentos para el formulario.";
 
 export function useAdminCities() {
-	const [departments, setDepartments] = useState<DepartamentOption[]>([]);
+	const [departments, setDepartments] = useState<Department[]>([]);
 	const [loadingDepartments, setLoadingDepartments] = useState(true);
 
 	const departmentNameMap = useMemo(() => {

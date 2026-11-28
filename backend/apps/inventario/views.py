@@ -21,24 +21,32 @@ class MarcaViewSet(viewsets.ModelViewSet):
     queryset = Marca.objects.order_by("nombre", "id_marca").select_related("id_pais")
     serializer_class = MarcaSerializer
 
-    # permission_classes = [permissions.IsAuthenticated]
+# Vista publica para la tienda (solo productos activos y solo lectura)
+class ProductoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = (
+        Producto.objects
+        .filter(estado=True)
+        .select_related("id_categoria", "id_marca")
+        .order_by("codigo_sku", "id_producto")
+    )
 
-# Vista principal de producto
-class ProductoViewSet(viewsets.ModelViewSet):
-    queryset = Producto.objects.select_related("id_categoria", "id_marca").prefetch_related("especificaciones").order_by("codigo_sku", "id_producto")
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == "retrieve":
+            return qs.prefetch_related("especificaciones")
+        return qs
 
-    # Sobreescritura del metodo get_serializer_class() para determinar distintos serializer
     def get_serializer_class(self):
-        if hasattr(self, 'action'):
-            if self.action == "list": # Pensado para la vista del cliente para ver todos los productos
-                return ProductoListSerializer
-            if self.action == "retrieve": # Utilizado cuando se busca un producto por su id
-                return ProductoDetailSerializer
-
-        return ProductoAllSerializer # Se retorna todo el modelo en el caso de que se utilice otro metodo
+        if self.action == "retrieve":
+            return ProductoDetailSerializer
+        return ProductoListSerializer
 
 class ProductoAdminViewSet(viewsets.ModelViewSet):
-    queryset = Producto.objects.select_related("id_categoria", "id_marca").order_by("codigo_sku", "id_producto")
+    queryset = (
+        Producto.objects
+        .select_related("id_categoria", "id_marca")
+        .order_by("codigo_sku", "id_producto")
+    )
     serializer_class = ProductoAllSerializer
 
 class EspecificacionViewSet(viewsets.ModelViewSet):

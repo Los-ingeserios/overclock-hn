@@ -125,7 +125,7 @@ CREATE TABLE promociones(
     fecha_inicio date NOT NULL,
     -- Una promocion podria no terminar, como los descuentos por tercera edad, cuarta edad
     fecha_vencimiento date,
-    porcentaje_descuento decimal(3,2) NOT NULL ,
+    porcentaje_descuento decimal(5,2) NOT NULL ,
     -- Columnas de cantidades para determinar los productos que aplican a los beneficios
     cantidad_requerida integer DEFAULT(1) NOT NULL,
     cantidad_beneficio integer DEFAULT(1) NOT NULL,
@@ -197,7 +197,7 @@ CREATE TABLE sucursales(
     correo varchar(30) NOT NULL
         CHECK(correo ~~ '%@%'),
     hora_apertura time NOT NULL,
-    hora_cierre time NOT NULL 
+    hora_cierre time NOT NULL
         CHECK(hora_cierre > hora_apertura),
     telefono varchar(20) UNIQUE NOT NULL,
     fecha_inauguracion date NOT NULL,
@@ -280,10 +280,10 @@ CREATE TABLE detalles_factura(
     id_factura integer REFERENCES facturas(id_factura) ON DELETE CASCADE,
     id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT,
     id_promocion integer REFERENCES promociones(id_promocion) ON DELETE SET NULL,
-    precio_venta decimal(19, 4) NOT NULL 
+    precio_venta decimal(19, 4) NOT NULL
         CHECK(precio_venta > 0),
     cantidad integer NOT NULL CHECK (cantidad > 0),
-    subtotal decimal(19, 4) NOT NULL 
+    subtotal decimal(19, 4) NOT NULL
         CHECK(subtotal > 0),
     descuento decimal(3, 2) NOT NULL CHECK (descuento >= 0 AND descuento <= 1), -- Porcentaje del descuento
     monto_descuento decimal(19, 4) NOT NULL CHECK (monto_descuento >= 0 AND monto_descuento <= subtotal), -- Monto que resulta de dicho descuento
@@ -353,14 +353,14 @@ CREATE TABLE detalles_pedidos(
     id_pedido integer REFERENCES pedidos(id_pedido) ON DELETE CASCADE NOT NULL,
     id_producto integer REFERENCES productos(id_producto) ON DELETE RESTRICT NOT NULL,
     id_promocion integer REFERENCES promociones(id_promocion) ON DELETE RESTRICT,
-    precio_venta decimal(19, 4) NOT NULL 
+    precio_venta decimal(19, 4) NOT NULL
         CHECK(precio_venta > 0),
     cantidad integer NOT NULL CHECK (cantidad > 0),
-    subtotal decimal(19, 4) NOT NULL 
+    subtotal decimal(19, 4) NOT NULL
         CHECK(subtotal > 0),
     descuento decimal(3, 2) NOT NULL CHECK (descuento >= 0 AND descuento <= 1),
     monto_descuento decimal(19, 4) NOT NULL CHECK (monto_descuento >= 0 AND monto_descuento <= subtotal),
-    subtotal_descuento decimal(19, 4) NOT NULL 
+    subtotal_descuento decimal(19, 4) NOT NULL
         CHECK (subtotal_descuento >= 0)
 );
 

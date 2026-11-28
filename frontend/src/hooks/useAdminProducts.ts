@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { productSchema, type ProductFormInput, type ProductPayload } from "../schemas/product.schema";
-import type { AdminProduct, BrandOption, CategoryOption } from "../types/products";
+import type { AdminProduct } from "../types/products";
 import { useCrudResource, type CrudMessages } from "./useCrudResource";
 import { adminProductService } from "../services/adminProductService";
 import { parseApiError } from "../lib/apiError";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Category } from "../types/category";
+import type { Brand } from "../types/brand";
 
 const PRODUCT_MESSAGES: CrudMessages = {
 	loadError: "No se pudieron cargar los productos.",
@@ -57,8 +59,8 @@ function toNumericString(value: string | number | null | undefined): string {
 }
 
 export function useAdminProducts() {
-	const [categories, setCategories] = useState<CategoryOption[]>([]);
-	const [brands, setBrands] = useState<BrandOption[]>([]);
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [brands, setBrands] = useState<Brand[]>([]);
 	const [loadingLookups, setLoadingLookups] = useState(true);
 
 	const categoryNameMap = useMemo(() => {

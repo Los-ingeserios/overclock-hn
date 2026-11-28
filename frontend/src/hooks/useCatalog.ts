@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Product } from "../types/products";
-import { mapApiProductToUi } from "../types/catalog";
-import type { ApiBrand, ApiCategory } from "../types/catalog";
 import { catalogService } from "../services/catalogService";
 import { parseApiError } from "../lib/apiError";
+import type { Category } from "../types/category";
+import type { Brand } from "../types/brand";
+import type { CatalogProduct } from "../types/products";
 
 interface CatalogData {
-	products: Product[];
+	products: CatalogProduct[];
 	totalCount: number;
 	hasNext: boolean;
 	hasPrevious: boolean;
-	categories: ApiCategory[];
-	brands: ApiBrand[];
+	categories: Category[];
+	brands: Brand[];
 }
 
 async function requestCatalogData(targetPage: number): Promise<CatalogData> {
@@ -22,7 +22,7 @@ async function requestCatalogData(targetPage: number): Promise<CatalogData> {
 	]);
 
 	return {
-		products: prodRes.results.map(mapApiProductToUi),
+		products: prodRes.results,
 		totalCount: prodRes.count,
 		hasNext: Boolean(prodRes.next),
 		hasPrevious: Boolean(prodRes.previous),
@@ -34,9 +34,9 @@ async function requestCatalogData(targetPage: number): Promise<CatalogData> {
 const CATALOG_FALLBACK_ERROR = "No se pudo cargar el catalogo desde el servidor.";
 
 export function useCatalog() {
-	const [products, setProducts] = useState<Product[]>([]);
-	const [categories, setCategories] = useState<ApiCategory[]>([]);
-	const [brands, setBrands] = useState<ApiBrand[]>([]);
+	const [products, setProducts] = useState<CatalogProduct[]>([]);
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [brands, setBrands] = useState<Brand[]>([]);
 
 	const [busqueda, setBusqueda] = useState("");
 	const [categoriaSel, setCategoriaSel] = useState<number | "Todas">("Todas");
@@ -114,12 +114,12 @@ export function useCatalog() {
 		return products.filter((prod) => {
 			const coincideTexto =
 				!q ||
-				prod.name.toLowerCase().includes(q) ||
-				prod.brand.toLowerCase().includes(q) ||
-				(prod.sku?.toLowerCase().includes(q) ?? false);
+				prod.modelo.toLowerCase().includes(q) ||
+				prod.id_marca.nombre.toLowerCase().includes(q) ||
+				(prod.codigo_sku?.toLowerCase().includes(q) ?? false);
 
-			const coincideCategoria = categoriaSel === "Todas" || prod.categoryId === categoriaSel;
-			const coincideMarca = marcaSel === "Todas" || prod.brandId === marcaSel;
+			const coincideCategoria = categoriaSel === "Todas" || prod.id_categoria.id_categoria === categoriaSel;
+			const coincideMarca = marcaSel === "Todas" || prod.id_marca.id_marca === marcaSel;
 
 			return coincideTexto && coincideCategoria && coincideMarca;
 		});

@@ -1,5 +1,5 @@
 import { api } from "../lib/api";
-import type { PaginatedResponse } from "../types/catalog";
+import type { PaginatedResponse } from "../types/api";
 
 export interface CrudService<TItem, TPayload> {
 	getAll: (page?: number) => Promise<PaginatedResponse<TItem>>;

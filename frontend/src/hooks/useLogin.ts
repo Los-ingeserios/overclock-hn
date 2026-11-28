@@ -2,11 +2,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
 import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "../types/auth";
 import { authService } from "../services/authService";
 import { loginSchema, type LoginFormValues } from "../schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import type { ApiErrorResponse } from "../types/api";
 
 export function useLogin() {
 	const navigate = useNavigate();

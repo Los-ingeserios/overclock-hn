@@ -1,10 +1,10 @@
 import { createCrudService } from "./createCrudService";
 import type { Brand, BrandPayload } from "../types/brand";
-import type { CountryOption } from "../types/department";
+import type { Country } from "../types/country";
 
-const countryLookupService = createCrudService<CountryOption, never>("/paises/");
+const countryLookupService = createCrudService<Country, never>("/paises/");
 
 export const brandService = {
-    ...createCrudService<Brand, BrandPayload>("/marcas/"),
-    getAllCountries: countryLookupService.getAllPages,
+	...createCrudService<Brand, BrandPayload>("/marcas/"),
+	getAllCountries: countryLookupService.getAllPages,
 };
